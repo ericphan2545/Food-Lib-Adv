@@ -1,0 +1,155 @@
+/* Copied from NutriPlan/css/theme.css */
+/* ===================================
+   THEME.CSS - Dark/Light Mode Management
+   =================================== */
+
+:root {
+  --bg-primary: var(--white);
+  --bg-secondary: var(--off-white);
+  --bg-tertiary: var(--soft-green);
+  --text-primary: var(--dark-text);
+  --text-secondary: var(--gray-text);
+  --border-color: var(--pale-green);
+  --card-bg: var(--white);
+  --input-bg: var(--off-white);
+  --footer-bg: var(--primary-green);
+  --footer-text: var(--white);
+  --footer-link-hover: var(--pale-green);
+  --footer-border: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --text-primary: #eaeaea;
+  --text-secondary: #b0b0b0;
+  --border-color: #2d4a3e;
+  --card-bg: #16213e;
+  --input-bg: #1a1a2e;
+
+  --white: #1a1a2e;
+  --off-white: #16213e;
+  --soft-green: #0f3460;
+  --pale-green: #2d4a3e;
+  --dark-text: #eaeaea;
+  --gray-text: #b0b0b0;
+  --shadow: rgba(0, 0, 0, 0.3);
+
+  --footer-bg: #0d1b15;
+  --footer-text: #b0b0b0;
+  --footer-link-hover: var(--mint-green);
+  --footer-border: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+[data-theme="dark"] body::before {
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 40% 40%, rgba(129, 199, 132, 0.1) 0%, transparent 30%);
+}
+
+[data-theme="dark"] .header {
+  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .food-card,
+[data-theme="dark"] .search-container {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .input-field,
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .filter-select {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .filter-btn {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .filter-btn:hover,
+[data-theme="dark"] .filter-btn.active {
+  background: var(--light-green);
+  color: var(--white);
+}
+
+[data-theme="dark"] .gender-option {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .gender-option.selected {
+  background: var(--bg-tertiary);
+  border-color: var(--light-green);
+}
+
+[data-theme="dark"] .nutrition-card {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .advice-box,
+[data-theme="dark"] .food-suggestions {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .food-tag {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: var(--transition-normal);
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.theme-toggle .icon-light { display: block; }
+.theme-toggle .icon-dark { display: none; }
+
+[data-theme="dark"] .theme-toggle .icon-light { display: none; }
+[data-theme="dark"] .theme-toggle .icon-dark { display: block; }
+
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.no-transition *,
+.no-transition *::before,
+.no-transition *::after {
+  transition: none !important;
+}
+

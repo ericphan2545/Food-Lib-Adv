@@ -13,9 +13,10 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "backend/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend/app.js",
+    "dev": "nodemon backend/app.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -27,6 +28,9 @@
     "method-override": "^3.0.0",
     "mongoose": "^9.4.1",
     "validator": "^13.15.35"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   },
   "keywords": []
 }
