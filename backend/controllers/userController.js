@@ -26,7 +26,11 @@ exports.loginForm = (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({  $or: [
+    { username: username },
+    { email: username }
+      ] 
+      });
     if (!user) {
       return res.status(400).render('users/login', {
         title: 'Đăng nhập',
