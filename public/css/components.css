@@ -141,6 +141,10 @@
   display: flex;
   flex-direction: column;
 }
+.food-card .image-container {
+  position: relative;
+  overflow: hidden;
+}
 .food-card:hover {
   transform: translateY(-12px) scale(1.02);
   box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.25);
@@ -197,6 +201,9 @@
   border-radius: var(--radius-md);
   font-size: 0.95rem;
   font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 .view-recipe-btn:hover {
   background: var(--primary-green);
@@ -251,6 +258,38 @@
   flex-direction: column;
 }
 .modal-overlay.show .modal { transform: translateY(0); }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  gap: var(--spacing-md);
+}
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--primary-green);
+  font-family: var(--font-heading);
+}
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gray-text);
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
+}
+.modal-close:hover {
+  background: var(--soft-green);
+  color: var(--primary-green);
+}
+.modal-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; }
 
 @media (max-width: 768px) {
   .nav ul { gap: var(--spacing-md); flex-wrap: wrap; justify-content: center; }
