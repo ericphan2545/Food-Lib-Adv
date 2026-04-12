@@ -96,6 +96,19 @@ const RecipeManager = {
     this.bindEvents();
     this.renderFoodCards();
   },
+  /** Tim trong header modal dùng chung luồng click với thẻ món (data-food-id). */
+  syncRecipeModalHeartFromStorage() {
+    const el = document.querySelector("#recipe-modal .modal-header .food-favorite[data-food-id]");
+    if (!el) return;
+    const id = parseInt(el.getAttribute("data-food-id"), 10);
+    if (!Number.isInteger(id) || id < 1) return;
+    const favorites = getFavoritesFromStorage();
+    const isFav = favorites.includes(id);
+    el.classList.toggle("favorited", isFav);
+    el.style.background = isFav ? "#ff6b6b" : "var(--white)";
+    el.setAttribute("aria-pressed", isFav ? "true" : "false");
+    el.setAttribute("aria-label", isFav ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích");
+  },
   cacheElements() {
     this.elements.modal = document.getElementById("recipe-modal");
     this.elements.modalBody = document.getElementById("modal-body-content");
@@ -130,6 +143,14 @@ const RecipeManager = {
     if (searchBtn) searchBtn.addEventListener("click", handleSearch);
     if (searchInput) searchInput.addEventListener("keyup", (e) => { if (e.key === "Enter") handleSearch(); });
 
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const modalHeart = e.target.closest("#recipe-modal .modal-header .food-favorite[data-food-id]");
+      if (!modalHeart) return;
+      e.preventDefault();
+      modalHeart.click();
+    });
+
     document.addEventListener("click", (e) => {
       const heart = e.target.closest(".food-favorite[data-food-id]");
       if (heart) {
@@ -144,6 +165,7 @@ const RecipeManager = {
         saveFavoritesToStorage(favorites);
         window.dispatchEvent(new CustomEvent("favoritesUpdated"));
         this.renderFoodCards();
+        this.syncRecipeModalHeartFromStorage();
         return;
       }
       const recipeBtn = e.target.closest(".view-recipe-btn");
@@ -250,23 +272,12 @@ const RecipeManager = {
     modal.style.display = "flex";
     setTimeout(() => modal.classList.add("show"), 10);
 
-    // hook favorite button in modal header if exists
-    const favBtn = document.querySelector("#recipe-modal .food-favorite");
+    const favBtn = document.querySelector("#recipe-modal .modal-header .food-favorite");
     if (favBtn) {
-      let favorites = getFavoritesFromStorage();
-      const isFav = favorites.includes(foodId);
-      favBtn.classList.toggle("favorited", isFav);
-      favBtn.style.background = isFav ? "#ff6b6b" : "var(--white)";
-      favBtn.onclick = (e) => {
-        e.stopPropagation();
-        favorites = getFavoritesFromStorage();
-        const idx = favorites.indexOf(foodId);
-        if (idx > -1) favorites.splice(idx, 1);
-        else favorites.push(foodId);
-        saveFavoritesToStorage(favorites);
-        window.dispatchEvent(new CustomEvent("favoritesUpdated"));
-        this.renderFoodCards();
-      };
+      favBtn.setAttribute("data-food-id", String(foodId));
+      favBtn.setAttribute("role", "button");
+      favBtn.setAttribute("tabindex", "0");
+      this.syncRecipeModalHeartFromStorage();
     }
   },
   closeModal() {

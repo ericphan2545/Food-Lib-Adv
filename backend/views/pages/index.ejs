@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-
     <link rel="stylesheet" href="/public/css/base.css">
     <link rel="stylesheet" href="/public/css/layout.css">
     <link rel="stylesheet" href="/public/css/components.css">
     <link rel="stylesheet" href="/public/css/theme.css">
-    <link rel="stylesheet" href="/public/css/favorites.css">
 </head>
 <body class="bg-pattern">
     <header class="header">
         <div class="header-content">
-            <a href="/" class="logo" style="text-decoration: none; color: inherit;">
+            <div class="logo">
                 <div class="logo-icon">🍳</div>
                 <h1>Food<span>Library</span></h1>
-            </a>
+            </div>
             <nav class="nav">
                 <ul>
                     <li><a href="/">Trang Chủ</a></li>
@@ -29,27 +27,45 @@
         </div>
     </header>
 
-    <main class="main-content favorites-page">
-        <section class="favorites-hero" aria-labelledby="favorites-heading">
-            <div class="favorites-hero-top">
-                <div>
-                    <h2 id="favorites-heading">Món ăn yêu thích</h2>
-                    <p class="favorites-subtitle">Danh sách được lưu trên trình duyệt của bạn. Nhấn vào trái tim trên thẻ món để bỏ yêu thích, hoặc mở công thức để xem chi tiết.</p>
+    <section class="section container" style="margin-top: 2rem;">
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" placeholder="Tìm kiếm món ăn theo tên...">
                 </div>
-                <span class="favorites-count-pill" aria-live="polite"><span aria-hidden="true">❤️</span> <span id="favoriteCount">Chưa có món ăn nào được yêu thích</span></span>
+                <button class="btn btn-primary btn-rounded">Tìm Kiếm</button>
             </div>
-        </section>
-
-        <div class="favorites-grid-wrap">
-            <div class="grid grid-4 favorites-grid" id="favoritesGrid" style="display: none;"></div>
+            <div class="filters">
+                <span class="filter-label">🏷️ Lọc theo:</span>
+                <div class="filter-group">
+                    <button class="filter-btn active">Tất cả</button>
+                    <button class="filter-btn">Món nước</button>
+                    <button class="filter-btn">Món quay</button>
+                    <button class="filter-btn">Tráng miệng</button>
+                    <button class="filter-btn">Món mặn</button>
+                </div>
+                <select class="filter-select" id="filter-difficulty">
+                    <option value="all">Độ khó (Tất cả)</option>
+                    <option value="Dễ">Dễ</option>
+                    <option value="Trung bình">Trung bình</option>
+                    <option value="Khó">Khó</option>
+                </select>
+                <select class="filter-select" id="filter-time">
+                    <option value="all">Thời gian (Tất cả)</option>
+                    <option value="under_30">Dưới 30 phút</option>
+                    <option value="30_60">30 - 60 phút</option>
+                    <option value="over_60">Trên 60 phút</option>
+                </select>
+            </div>
         </div>
+    </section>
 
-        <div id="emptyState" class="favorites-empty" style="display: none;">
-            <div class="favorites-empty-icon" aria-hidden="true">💔</div>
-            <h3>Chưa có món yêu thích</h3>
-            <p>Thêm món từ trang chủ bằng cách nhấn biểu tượng trái tim trên thẻ món hoặc trong cửa sổ chi tiết công thức.</p>
-            <a href="/" class="btn btn-primary btn-rounded">Khám phá món ăn</a>
+    <main class="main-content">
+        <div class="section-header">
+            <h2 class="section-title">Khám Phá Món Ăn</h2>
+            <span class="result-count"></span>
         </div>
+        <div class="grid grid-4" id="food-grid"></div>
     </main>
 
     <footer class="footer">
@@ -89,8 +105,8 @@
         <span class="icon-dark">☀️</span>
     </button>
 
-    <div id="recipe-modal" class="modal-overlay" style="display: none;">
-        <div class="modal recipe-modal-panel">
+    <div id="recipe-modal" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal" style="max-width: 800px; width: 90%; margin: 2rem auto; max-height: 90vh; display: flex; flex-direction: column; background: var(--white); border-radius: 16px; position: relative;">
             <div class="modal-header">
                 <h3 class="modal-title">Chi tiết công thức</h3>
                 <div class="modal-header-actions">
@@ -98,7 +114,7 @@
                     <button type="button" class="modal-close" onclick="closeRecipeModal()" aria-label="Đóng">✕</button>
                 </div>
             </div>
-            <div class="modal-body" id="modal-body-content"></div>
+            <div class="modal-body" id="modal-body-content" style="padding: 1.5rem; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -106,6 +122,6 @@
     <script src="/public/js/theme.js"></script>
     <script src="/public/js/food-database.js"></script>
     <script src="/public/js/recipes.js"></script>
-    <script src="/public/js/favorites.js"></script>
 </body>
 </html>
+
