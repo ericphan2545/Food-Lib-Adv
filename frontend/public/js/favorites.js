@@ -1,99 +1,132 @@
-// Trang Yêu thích — đồng bộ localStorage với recipes.js (mảng id số nguyên dương)
-(function () {
-  function normalizeFavoriteIds(raw) {
-    try {
-      const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-      if (!Array.isArray(data)) return [];
-      return data
-        .map((x) => (typeof x === "number" ? x : parseInt(String(x), 10)))
-        .filter((n) => Number.isInteger(n) && n > 0);
-    } catch {
-      return [];
-    }
-  }
+// Favorites Management - Backend API Integration
+/**
+ * Favorites Page
+ * Uses backend API instead of localStorage
+ */
 
-  function getRecipesArray() {
-    const names = Object.keys(window.recipesDB || {});
-    return names.map((name, idx) => ({
-      id: idx + 1,
-      name,
-      ...window.recipesDB[name],
-    }));
-  }
+async function getFavoriteFoods() {
+  try {
+    const favResponse = await fetch('/api/favorites');
+    if (!favResponse.ok) return [];
+    const favData = await favResponse.json();
+    const favoritesIds = favData.favorites || [];
 
-  const Favorites = {
-    favoriteIds: [],
-    init() {
+    const foodsResponse = await fetch('/api/foods');
+    if (!foodsResponse.ok) return [];
+    const allFoods = await foodsResponse.json();
+
+    return allFoods
+      .map((food, idx) => ({ ...food, id: idx + 1 }))
+      .filter(food => favoritesIds.includes(food.id));
+  } catch (error) {
+    console.error('Failed to get favorite foods:', error);
+    return [];
+  }
+}
+
+const Favorites = {
+  favoriteIds: [],
+  init() {
+    this.loadFavorites();
+    this.render();
+    window.addEventListener("favoritesUpdated", () => {
       this.loadFavorites();
       this.render();
-      window.addEventListener("storage", () => {
-        this.loadFavorites();
-        this.render();
-      });
-      window.addEventListener("favoritesUpdated", () => {
-        this.loadFavorites();
-        this.render();
-      });
-    },
-    loadFavorites() {
-      const stored = localStorage.getItem("favorites");
-      this.favoriteIds = normalizeFavoriteIds(stored || "[]");
-      if (stored) {
-        const normalized = JSON.stringify(this.favoriteIds);
-        if (normalized !== stored) localStorage.setItem("favorites", normalized);
+    });
+  },
+  async loadFavorites() {
+    try {
+      const response = await fetch('/api/favorites');
+      if (response.ok) {
+        const data = await response.json();
+        this.favoriteIds = data.favorites || [];
       }
-    },
-    getFavoriteFoods() {
-      const all = getRecipesArray();
-      return all.filter((food) => this.favoriteIds.includes(food.id));
-    },
-    render() {
-      const grid = document.getElementById("favoritesGrid");
-      if (!grid) return;
-      const emptyState = document.getElementById("emptyState");
-      const resultCount = document.getElementById("favoriteCount");
-      const favorites = this.getFavoriteFoods();
+    } catch (error) {
+      console.error('Failed to load favorites:', error);
+    }
+  },
+  async getFavoriteFoods() {
+    try {
+      const foodsResponse = await fetch('/api/foods');
+      if (!foodsResponse.ok) return [];
+      const allFoods = await foodsResponse.json();
 
-      if (!favorites.length) {
-        grid.style.display = "none";
-        grid.innerHTML = "";
-        if (emptyState) emptyState.style.display = "block";
-        if (resultCount) resultCount.textContent = "Chưa có món ăn nào được yêu thích";
-        return;
+      return allFoods
+        .map((food) => ({ ...food, id: food.foodId }))
+        .filter((food) => this.favoriteIds.includes(food.id));
+    } catch (error) {
+      console.error('Failed to get favorite foods:', error);
+      return [];
+    }
+  },
+  async render() {
+    const grid = document.getElementById("favoritesGrid");
+    if (!grid) return;
+    const emptyState = document.getElementById("emptyState");
+    const resultCount = document.getElementById("favoriteCount");
+    
+    const favorites = await this.getFavoriteFoods();
+
+    if (!favorites.length) {
+      grid.style.display = "none";
+      grid.innerHTML = "";
+      if (emptyState) emptyState.style.display = "block";
+      if (resultCount) resultCount.textContent = "Chua c� m�n an n�o du?c y�u th�ch";
+      return;
+    }
+
+    grid.style.display = "grid";
+    if (emptyState) emptyState.style.display = "none";
+    if (resultCount) resultCount.textContent = \\ m�n dang luu\;
+
+    grid.innerHTML = favorites
+      .map(
+        (food) => \
+          <article class="food-card food-card--favorite">
+            <div class="image-container">
+              <img src="\" alt="\" class="food-image">
+              <span class="food-category-badge">\</span>
+              <div class="food-favorite favorited" data-food-id="\" title="Nh?n d? b? kh?i y�u th�ch" role="button" tabindex="0">
+                <span aria-hidden="true">??</span>
+              </div>
+            </div>
+            <div class="food-content">
+              <h3 class="food-name">\</h3>
+              <p class="food-description">\</p>
+              <div class="food-meta">
+                <span class="food-time">?? \</span>
+                <span class="food-difficulty">\</span>
+              </div>
+              <button type="button" class="view-recipe-btn" data-recipe-name="\">Xem c�ng th?c</button>
+            </div>
+          </article>
+        \
+      )
+      .join("");
+
+    grid.addEventListener("click", async (e) => {
+      const heart = e.target.closest(".food-favorite[data-food-id]");
+      if (heart) {
+        e.preventDefault();
+        e.stopPropagation();
+        const foodId = parseInt(heart.getAttribute("data-food-id"), 10);
+        try {
+          const response = await fetch('/api/favorites/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ foodId })
+          });
+          if (response.ok) {
+            window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+          }
+        } catch (error) {
+          console.error('Failed to remove favorite:', error);
+        }
       }
+    });
+  },
+};
 
-      grid.style.display = "grid";
-      if (emptyState) emptyState.style.display = "none";
-      if (resultCount) resultCount.textContent = `${favorites.length} món đang lưu`;
-
-      grid.innerHTML = favorites
-        .map(
-          (food) => `
-            <article class="food-card food-card--favorite">
-              <div class="image-container">
-                <img src="${food.image}" alt="${food.name}" class="food-image">
-                <span class="food-category-badge">${food.category || "Món ngon"}</span>
-                <div class="food-favorite favorited" data-food-id="${food.id}" title="Nhấn để bỏ khỏi yêu thích" role="button" tabindex="0">
-                  <span aria-hidden="true">❤️</span>
-                </div>
-              </div>
-              <div class="food-content">
-                <h3 class="food-name">${food.name}</h3>
-                <p class="food-description">${food.description || ""}</p>
-                <div class="food-meta">
-                  <span class="food-time">⏱️ ${food.time || "—"}</span>
-                  <span class="food-difficulty">${food.difficulty || "—"}</span>
-                </div>
-                <button type="button" class="view-recipe-btn" data-recipe-name="${food.name}">Xem công thức</button>
-              </div>
-            </article>
-          `
-        )
-        .join("");
-    },
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    Favorites.init();
-  });
-})();
+document.addEventListener("DOMContentLoaded", () => {
+  Favorites.init();
+});

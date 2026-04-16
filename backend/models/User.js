@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
         message: "Weak Pasword",
       },
     },
+    favorites: { type: [Number], default: [] },
   },
   { timestamps: true },
 );

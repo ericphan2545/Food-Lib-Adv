@@ -8,6 +8,7 @@ const connectDB = require("./config/db");
 
 const userRoutes = require("./routes/userRoutes");
 const pageRoutes = require("./routes/pageRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use(
   express.static(path.join(__dirname, "..", "frontend", "public")),
 );
 
+app.use("/api", apiRoutes);
 app.use("/users", userRoutes);
 app.use("/", pageRoutes);
 
