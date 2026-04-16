@@ -510,7 +510,8 @@ const RecipeManager = {
     cacheElements() {
         this.elements.modal = document.getElementById("recipe-modal");
         this.elements.modalBody = document.getElementById("modal-body-content");
-        this.elements.closeBtn = document.querySelector(".close-modal");
+        // Nút đóng đúng class trong EJS là `.modal-close`
+        this.elements.closeBtn = document.querySelector("#recipe-modal .modal-close");
         this.elements.foodGrid = document.getElementById("food-grid");
         this.elements.favoritesGrid = document.getElementById("favoritesGrid");
         this.elements.difficultySelect = document.getElementById("filter-difficulty");
@@ -537,15 +538,66 @@ const RecipeManager = {
     },
 
     bindGridEvents() {
-        const handleViewRecipe = (e) => {
-            if (e.target.classList.contains("view-recipe-btn")) {
-                const card = e.target.closest(".food-card");
-                const foodName = card.querySelector(".food-name").innerText.trim();
-                this.showDetails(foodName);
+        const getFoodIdFromCard = (card) => {
+            if (!card) return null;
+            const heart = card.querySelector(".food-favorite");
+            const idAttr = heart?.getAttribute?.("data-food-id");
+            const id = Number(idAttr);
+            if (Number.isFinite(id) && id > 0) return id;
+
+            // fallback: tính theo thứ tự recipesDB (tương thích dữ liệu hiện tại)
+            const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
+            const foodNames = Object.keys(recipesDB);
+            const idx = foodNames.indexOf(foodName);
+            return idx >= 0 ? idx + 1 : null;
+        };
+
+        const toggleFavoriteById = (foodId, heartEl) => {
+            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+            const index = favorites.indexOf(foodId);
+            const isFav = index >= 0;
+
+            if (isFav) favorites.splice(index, 1);
+            else favorites.push(foodId);
+
+            localStorage.setItem("favorites", JSON.stringify(favorites));
+
+            if (heartEl) {
+                if (!isFav) {
+                    heartEl.classList.add("favorited");
+                    heartEl.style.background = "#ff6b6b";
+                } else {
+                    heartEl.classList.remove("favorited");
+                    heartEl.style.background = "var(--white)";
+                }
+            }
+
+            // Báo cho trang Favorites / các phần khác cập nhật lại
+            window.dispatchEvent(new CustomEvent("favoritesUpdated", { detail: favorites }));
+        };
+
+        const handleGridClick = (e) => {
+            const heart = e.target.closest?.(".food-favorite");
+            if (heart) {
+                e.preventDefault();
+                e.stopPropagation();
+                const card = heart.closest(".food-card");
+                const foodId = Number(heart.getAttribute("data-food-id")) || getFoodIdFromCard(card);
+                if (!foodId) return;
+                toggleFavoriteById(foodId, heart);
+                return;
+            }
+
+            const viewBtn = e.target.closest?.(".view-recipe-btn");
+            if (viewBtn) {
+                const card = viewBtn.closest(".food-card");
+                const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
+                if (foodName) this.showDetails(foodName);
             }
         };
-        if (this.elements.foodGrid) this.elements.foodGrid.addEventListener("click", handleViewRecipe);
-        if (this.elements.favoritesGrid) this.elements.favoritesGrid.addEventListener("click", handleViewRecipe);
+
+        if (this.elements.foodGrid) this.elements.foodGrid.addEventListener("click", handleGridClick);
+        if (this.elements.favoritesGrid) this.elements.favoritesGrid.addEventListener("click", handleGridClick);
     },
 
     bindSearchAndFilterEvents() {
@@ -772,7 +824,7 @@ const RecipeManager = {
                         <div class="image-container">
                             <img src="${recipe.image}" alt="${foodName}" class="food-image">
                             <span class="food-category-badge">${recipe.category || "Món Ngon"}</span>
-                            <div class="food-favorite ${heartClass}" ${heartStyle}><span>❤️</span></div>
+                            <div class="food-favorite ${heartClass}" data-food-id="${foodId}" ${heartStyle}><span>❤️</span></div>
                         </div>
                         <div class="food-content">
                             <h3 class="food-name">${foodName}</h3>

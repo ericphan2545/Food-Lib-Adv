@@ -7,15 +7,10 @@
 
 // Helper function to get base path
 function getBasePath() {
-  // Try to get from import.meta.env (Vite)
-  if (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) {
-    return import.meta.env.BASE_URL;
-  }
-  // Fallback: detect from current path
-  const path = window.location.pathname;
-  if (path.startsWith("/NutriPlan/")) {
-    return "/NutriPlan/";
-  }
+  // NOTE: file này được load như script thường (EJS/Express),
+  // nên không dùng `import.meta` (sẽ gây SyntaxError trên browser).
+  const path = window.location.pathname || "/";
+  if (path.startsWith("/NutriPlan/")) return "/NutriPlan/";
   return "/";
 }
 

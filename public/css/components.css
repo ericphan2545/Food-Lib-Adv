@@ -1537,6 +1537,39 @@
 .modal-header {
     background: var(--white);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
+    /* Fix UI: căn layout header tránh chồng icon */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+/* Cụm nút bên phải (❤️ + ✕) */
+.modal-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+/* IMPORTANT: `.food-favorite` mặc định là absolute (dành cho card).
+   Trong modal header phải là static để không đè tiêu đề. */
+.modal-header .food-favorite {
+    position: static;
+    top: auto;
+    right: auto;
+    width: 36px;
+    height: 36px;
+    box-shadow: none;
+    border: 1px solid var(--pale-green);
+}
+
+.modal-title {
+    margin: 0;
+    line-height: 1.2;
+    flex: 1 1 auto;
 }
 
 /* Hiệu ứng hover cho nút đóng trong header */
