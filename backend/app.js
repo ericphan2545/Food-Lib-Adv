@@ -1,4 +1,5 @@
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
@@ -17,7 +18,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const sessionSecret = process.env.SESSION_SECRET || 'keyboard cat';
+// Bug 3 fix: không dùng fallback "keyboard cat" (không an toàn).
+// - Production: bắt buộc phải set SESSION_SECRET.
+// - Dev: nếu chưa set thì tạo secret ngẫu nhiên cho phiên chạy hiện tại.
+let sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Missing SESSION_SECRET environment variable (required in production).');
+  }
+  sessionSecret = crypto.randomBytes(32).toString('hex');
+  console.warn('[Session] SESSION_SECRET chưa được set. Đang dùng secret ngẫu nhiên cho DEV.');
+}
 app.use(
   session({
     secret: sessionSecret,
