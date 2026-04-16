@@ -11,13 +11,8 @@ const pageRoutes = require("./routes/pageRoutes");
 
 const app = express();
 
-<<<<<<< HEAD
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "frontend", "views"));
-=======
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
->>>>>>> UI/popup-favorite
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
