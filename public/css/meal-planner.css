@@ -1,201 +1,1421 @@
-/* Copied from NutriPlan/css/meal-planner.css (kept as-is) */
 /* ===================================
    MEAL-PLANNER.CSS - NutriPlan Styles
    =================================== */
 
-/* This file is intentionally large and kept close to the original to preserve UI */
-/* (Truncated duplicates from the original project may exist) */
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #1a4d2e;
+    --primary-light: #4a7c59;
+    --pale-green: #c8e6c9;
+    --primary-dark: #0d2818;
+    --accent: #f9a826;
+    --accent-light: #ffc857;
+    --bg-cream: #faf7f2;
+    --bg-sage: #e8efe5;
+    --text-dark: #1a1a1a;
+    --text-muted: #6b7280;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.1);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,0.15);
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+}
+
+body {
+    /* font-family: 'Nunito', sans-serif; */
+    background: var(--bg-cream);
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
 
 /* Background Pattern */
 .bg-pattern {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(26, 77, 46, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 90% 80%, rgba(249, 168, 38, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(74, 124, 89, 0.02) 0%, transparent 70%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(26,77,46,0.03) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(249,168,38,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(74,124,89,0.02) 0%, transparent 70%);
 }
 
-/* Minimal subset for layout; the rest can be extended later */
+/* Typography */
+h1, h2, h3 {
+    font-family: 'Libre Baskerville', serif;
+    font-weight: 700;
+}
+
+/* ===== HEADER / TOP NAV (MỚI) ===== */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    box-shadow: var(--shadow-sm);
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px var(--shadow-dark);
+}
+
+.logo h1 {
+    font-family: var(--font-heading);
+    color: var(--white);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, .1);
+}
+
+.logo span {
+    color: var(--pale-green);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.btn-settings {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn-settings:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 77, 46, 0.2);
+}
+
+.btn-settings:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* ===== MAIN CONTAINER (UPDATED LAYOUT) ===== */
 .main-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 3rem;
+    padding-top: 100px; /* Bù cho Header cố định */
+    padding-bottom: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .content-area {
-  width: 100%;
-  padding: 0 2rem;
+    width: 100%;
+    padding: 0 2rem;
 }
 
+/* ===== CONTENT HEADER ===== */
 .content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 .page-title {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 1.75rem;
-  color: var(--primary-green);
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: var(--primary);
 }
 
 .week-navigation {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .week-nav-btn {
-  width: 40px;
-  height: 40px;
-  background: var(--white);
-  border: 2px solid var(--pale-green);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1.25rem;
-  color: var(--primary-green);
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border: 2px solid var(--bg-sage);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.25rem;
+    color: var(--primary);
 }
 
 .week-nav-btn:hover {
-  background: var(--primary-green);
-  color: var(--white);
-  border-color: var(--primary-green);
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
 }
 
+.week-nav-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+.current-week {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+/* ===== BMI FORM SECTION (STYLED FOR MODAL) ===== */
+/* Đã sửa màu sắc để phù hợp nền trắng của Modal */
+.bmi-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-dark); /* Màu tối cho nền trắng */
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    padding-right: 3rem;
+    background: var(--white);
+    border: 1px solid #ddd; /* Viền xám nhạt */
+    border-radius: var(--radius-sm);
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 77, 46, 0.1);
+}
+
+.input-unit {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Gender Options - Light Theme */
+.gender-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.gender-option {
+    padding: 0.8rem;
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gender-option:hover {
+    border-color: var(--primary);
+    background: var(--bg-sage);
+}
+
+.gender-option.selected {
+    background: rgba(26, 77, 46, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.gender-option .icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Activity Options - Light Theme */
+.activity-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.activity-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.activity-option:hover {
+    background: var(--bg-sage);
+}
+
+.activity-option.selected {
+    background: rgba(26, 77, 46, 0.1);
+    border-color: var(--primary);
+}
+
+.activity-option .radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+}
+
+.activity-option.selected .radio {
+    border-color: var(--primary);
+}
+
+.activity-option.selected .radio::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 10px; height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+}
+
+.calculate-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.calculate-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 77, 46, 0.2);
+}
+
+/* ===== BMI RESULT CARD (IN MODAL) ===== */
+.bmi-result-card {
+    background: var(--bg-sage);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    display: flex;
+}
+
+.bmi-result-card.show {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+.bmi-value-display {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.bmi-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.bmi-status-text {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.bmi-scale-bar {
+    height: 8px;
+    background: linear-gradient(90deg, #64b5f6, #4caf50, #ffc107, #ff5722);
+    border-radius: 4px;
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+.bmi-scale-pointer {
+    position: absolute;
+    top: -6px;
+    width: 4px;
+    height: 20px;
+    background: #333;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+}
+
+.calories-info {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.calorie-item .value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ===== NUTRITION SUMMARY ===== */
 .nutrition-summary {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
 .nutrition-card {
-  background: var(--white);
-  border-radius: 16px;
-  padding: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
 }
 
-.planner-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.5rem;
-  align-items: start;
-  width: 100%;
+.nutrition-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
 
+.nutrition-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.nutrition-icon.carbs { background: #fff3e0; }
+.nutrition-icon.protein { background: #fce4ec; }
+.nutrition-icon.fat { background: #e8f5e9; }
+.nutrition-icon.fiber { background: #e3f2fd; }
+
+.nutrition-info h4 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+}
+
+.nutrition-info .value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.nutrition-info .unit {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ===== WEEKLY CALENDAR ===== */
 .weekly-calendar {
-  background: var(--white);
-  border-radius: 16px;
-  padding: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
 }
 
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.auto-generate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auto-generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26,77,46,0.3);
+}
+
+.auto-generate-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+/* ===== DAYS GRID ===== */
 .days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.75rem;
 }
 
 .day-column {
-  background: var(--off-white);
-  border-radius: 16px;
-  padding: 0.5rem;
-  min-height: 180px;
+    background: var(--bg-cream);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    min-height: 320px;
+    transition: all 0.3s ease;
+}
+
+.day-header {
+    text-align: center;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid var(--bg-sage);
+}
+
+.day-name {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.day-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ===== MEAL SLOTS ===== */
+.meal-slots {
+    display: flex;
+    flex-direction: column;
+    
+    gap: 0.5rem;
 }
 
 .meal-slot {
-  background: var(--white);
-  border-radius: 8px;
-  padding: 0.625rem;
-  border: 2px dashed var(--pale-green);
-  min-height: 140px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem;
+    border: 2px dashed var(--bg-sage);
+    min-height: 140px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    justify-content: center;
+    align-content: center;
+}
+
+.meal-slot:hover {
+    border-color: var(--primary-light);
+    border-style: solid;
 }
 
 .meal-slot.has-meal {
-  border-style: solid;
-  border-color: var(--light-green);
+    border-style: solid;
+    border-color: var(--primary-light);
 }
 
-.remove-meal-btn,
+.meal-slot-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    position: absolute;
+    top: 8px;   /* Cách mép trên 8px */
+    left: 10px;
+}
+
+.meal-slot-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meal-emoji { font-size: 1.25rem; }
+
+.meal-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.meal-calories {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.add-meal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    height: 30px;
+}
+
+.remove-meal-btn {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 18px; height: 18px;
+    background: #ff5252;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+}
+
 .detail-meal-btn {
-  position: absolute;
-  top: 4px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    top: 4px; right: 25px;
+    width: 18px; height: 18px;
+    background: lightgray;
+    color: black;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
 }
 
-.remove-meal-btn { right: 4px; background: #ff5252; color: white; }
-.detail-meal-btn { right: 25px; background: lightgray; color: black; }
-.meal-slot:hover .remove-meal-btn,
+.meal-slot:hover .remove-meal-btn { opacity: 1; }
 .meal-slot:hover .detail-meal-btn { opacity: 1; }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.remove-meal-btn:hover {
+    background: #e53935;
 }
 
-.modal-overlay.show { opacity: 1; }
+.detail-meal-btn:hover {
+    background: gray;
+    color: white;
+}
+
+
+
+/* ===== MODAL COMMON STYLES ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex; /* JS will toggle flex */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show, .modal-overlay.active {
+    opacity: 1;
+}
 
 .modal {
-  background: var(--white);
-  border-radius: 24px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow: hidden;
-  transform: translateY(20px);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px; /* Default max width */
+    max-height: 90vh;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.modal-overlay.show .modal { transform: translateY(0); }
+.modal-overlay.show .modal, .modal-overlay.active .modal {
+    transform: translateY(0);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--bg-sage);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    color: var(--primary);
+    font-family: 'Quicksand', sans-serif;
+}
+
+.modal-close {
+    width: 32px; height: 32px;
+    background: var(--bg-cream);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #ff5252;
+    color: white;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+/* ===== FOOD MODAL SPECIFIC ===== */
+/* Override width for food modal to be wider */
+#foodModal .modal {
+    max-width: 800px;
+}
+
+.food-filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    padding: 0.5rem 1rem;
+    background: var(--bg-cream);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.filter-tab.active {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.food-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.food-item {
+    background: var(--bg-cream);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.food-item:hover {
+    background: var(--bg-sage);
+    transform: translateY(-2px);
+}
+
+.food-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.food-item-header {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
+}
+.food-item-emoji { font-size: 2rem; }
+.food-item-name { font-weight: 700; color: var(--text-dark); font-size: 0.95rem; }
+
+.food-item-meta {
+    display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);
+}
+.food-item-calories { font-weight: 600; color: var(--primary); }
+
+.food-item-nutrients {
+    display: flex; gap: 0.5rem; margin-top: 0.5rem;
+}
+
+.nutrient-badge {
+    padding: 0.2rem 0.5rem;
+    background: var(--white);
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.nutrient-badge.carbs { color: #f57c00; }
+.nutrient-badge.protein { color: #d81b60; }
+.nutrient-badge.fat { color: #43a047; }
+.nutrient-badge.fiber { color: #1e88e5; }
+
+.usage-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: #ff5252; color: white;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 0.7rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== NUTRITION BALANCE WARNING ===== */
+.nutrition-warning {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1rem;
+}
+.nutrition-warning.hidden { display: none; }
+.warning-icon { font-size: 1.5rem; }
+.warning-text { font-weight: 600; color: #e65100; }
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+.theme-toggle:hover { transform: scale(1.1); }
+.theme-toggle .icon-light { display: block; }
+.theme-toggle .icon-dark { display: none; }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] {
+    --bg-cream: #1a1a2e;
+    --bg-sage: #16213e;
+    --text-dark: #eaeaea;
+    --text-muted: #b0b0b0;
+    --white: #1e2746;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .theme-toggle .icon-light { display: none; }
+[data-theme="dark"] .theme-toggle .icon-dark { display: block; }
+
+[data-theme="dark"] .top-nav,
+[data-theme="dark"] .nutrition-card,
+[data-theme="dark"] .weekly-calendar,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .gender-option,
+[data-theme="dark"] .activity-option,
+[data-theme="dark"] .input-field {
+    background: #1e2746;
+    border-color: #2d4a6a;
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .gender-option:hover,
+[data-theme="dark"] .activity-option:hover {
+    background: #16213e;
+}
+
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .input-field {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .day-column,
+[data-theme="dark"] .food-item,
+[data-theme="dark"] .filter-tab,
+[data-theme="dark"] .bmi-result-card {
+    background: #16213e;
+}
+
+[data-theme="dark"] .meal-slot {
+    background: #1e2746;
+    border-color: #2d4a6a;
+}
+
+[data-theme="dark"] .nutrient-badge {
+    background: #16213e;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1400px) {
+    .days-grid { grid-template-columns: repeat(4, 1fr); }
+}
 
 @media (max-width: 1024px) {
-  .planner-layout { grid-template-columns: 1fr; }
-  .days-grid { grid-template-columns: repeat(3, 1fr); }
-  .nutrition-summary { grid-template-columns: repeat(2, 1fr); }
+    .days-grid { grid-template-columns: repeat(3, 1fr); }
+    .nutrition-summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .top-nav { padding: 0 1rem; }
+    .content-area { padding: 0 1rem; }
+    .days-grid { grid-template-columns: repeat(2, 1fr); }
+    
+    .logo h1 { font-size: 1.2rem; }
+    .btn-settings span { display: none; } /* Hide icon text on mobile */
+    .btn-settings { padding: 0.5rem 0.8rem; }
 }
 
 @media (max-width: 600px) {
-  .days-grid { grid-template-columns: 1fr; }
-  .nutrition-summary { grid-template-columns: 1fr; }
+    .days-grid { grid-template-columns: 1fr; }
+    .nutrition-summary { grid-template-columns: 1fr; }
+    .food-grid { grid-template-columns: 1fr; }
+    
+    .modal { width: 95%; max-height: 95vh; }
+    .gender-options { grid-template-columns: 1fr; }
+}
+.modal-actions .btn-cancel {
+    padding: 0.8rem 1.5rem;
+    background: #f1f3f5;
+    color: var(--text-muted);
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
 }
 
+.modal-actions .btn-cancel:hover {
+    background: #e9ecef;
+    color: var(--text-dark);
+}
+
+.modal-actions .btn-confirm {
+    padding: 0.8rem 1.5rem;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    box-shadow: 0 4px 15px rgba(26, 77, 46, 0.3);
+}
+
+.modal-actions .btn-confirm:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+/* =========================================
+   BMI RESULT CARD STYLES (MODERN DASHBOARD)
+   ========================================= */
+
+.bmi-result-card {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    margin-top: 2rem;
+    padding: 2rem;
+    border-radius: 24px;
+    background-color: var(--card-bg, #fff); /* Tự động theo theme */
+    box-shadow: var(--shadow-lg, 0 10px 30px rgba(0,0,0,0.1));
+    border: 1px solid var(--border-color, transparent);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* --- CỘT TRÁI: ĐIỂM SỐ BMI --- */
+.bmi-overview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border-color, #eee);
+    padding-right: 2rem;
+}
+
+.bmi-card-title {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.bmi-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    /* Gradient xanh đẹp mắt */
+    background: linear-gradient(135deg, var(--primary-green), var(--mint-green));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(46, 125, 50, 0.3);
+    position: relative;
+}
+
+.bmi-score {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.bmi-unit {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.bmi-status-text {
+    margin-top: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    text-align: center;
+}
+/* Dark Mode cho chữ trạng thái */
+[data-theme="dark"] .bmi-status-text {
+    color: var(--mint-green);
+}
+
+/* --- CỘT PHẢI: CÁC CHỈ SỐ CHI TIẾT --- */
+.bmi-details-grid {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    background-color: var(--bg-secondary, #f8f9fa); /* Màu nền box con */
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateX(5px);
+}
+
+/* Dark Mode cho các box con */
+[data-theme="dark"] .stat-item {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    background-color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+[data-theme="dark"] .stat-icon {
+    background-color: var(--bg-tertiary);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-black);
+}
+
+.stat-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-left: 4px;
+    font-weight: 400;
+}
+
+/* --- HIGHLIGHT ITEM (Mục tiêu Calo) --- */
+.highlight-item {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 87, 34, 0.1));
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+[data-theme="dark"] .highlight-item {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.15), rgba(255, 87, 34, 0.15));
+    border: 1px solid rgba(255, 152, 0, 0.5);
+}
+
+.stat-value-large {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #e65100; /* Màu cam đậm */
+}
+[data-theme="dark"] .stat-value-large {
+    color: #ff9800; /* Màu cam sáng */
+}
+
+/* --- RESPONSIVE (Mobile) --- */
+@media (max-width: 768px) {
+    .bmi-result-card {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .bmi-overview {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color, #eee);
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+    }
+
+    .bmi-circle {
+        width: 120px;
+        height: 120px;
+    }
+
+    .bmi-score {
+        font-size: 2.5rem;
+    }
+}
+/* ======================================================
+   FIX LAYOUT & COMPACT STYLE (FINAL VERSION)
+   ====================================================== */
+
+/* 1. Xử lý lỗi bị menu che khuất */
+.main-container {
+    /* padding-top: 140px !important; Tăng khoảng cách đẩy xuống */
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 3rem;
+}
+
+/* 2. Grid Layout: Cột trái cố định 280px, Cột phải tự giãn */
+.planner-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* 280px cho BMI, còn lại cho Lịch */
+    gap: 1.5rem;
+    align-items: start; /* Căn thẳng hàng bên trên */
+    width: 100%;
+}
+
+/* 3. Tinh chỉnh BMI Card (Compact) */
+.planner-layout .bmi-result-card {
+    display: flex !important; /* Bắt buộc dùng Flex */
+    flex-direction: column;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    height: 36.5rem; /* Chiều cao vừa khít nội dung */
+    margin-top: 0 !important;
+}
+
+/* Phần vòng tròn BMI */
+.planner-layout .bmi-overview {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    padding-right: 0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.planner-layout .bmi-circle {
+    width: 90px;  /* Thu nhỏ vòng tròn */
+    height: 90px;
+    margin: 0 auto;
+}
+
+.planner-layout .bmi-score {
+    font-size: 1.8rem; /* Số nhỏ lại */
+}
+
+.planner-layout .bmi-unit {
+    font-size: 0.7rem;
+}
+
+.planner-layout .bmi-card-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Phần chỉ số chi tiết */
+.planner-layout .bmi-details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.planner-layout .stat-item {
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: space-between; /* Đẩy chữ sang 2 bên */
+    align-items: center;
+}
+
+.planner-layout .stat-label {
+    font-size: 0.8rem;
+}
+
+.planner-layout .stat-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.planner-layout .stat-icon {
+    display: none; /* Ẩn icon lửa/sấm sét cho gọn */
+}
+
+/* 4. Tinh chỉnh Lịch (Compact) */
+.planner-layout .weekly-calendar {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 0 !important;
+}
+
+.planner-layout .calendar-header {
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.planner-layout .calendar-title {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.planner-layout .auto-generate-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+/* Grid các ngày */
+.planner-layout .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 cột đều nhau */
+    gap: 0.5rem;
+}
+
+.planner-layout .day-column {
+    padding: 0.5rem;
+    min-height: 180px; /* Chiều cao tối thiểu ngắn lại */
+}
+
+.planner-layout .day-header {
+    font-size: 0.8rem;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.planner-layout {
+    padding: 0.3rem;
+    min-height: 50px;
+    margin-bottom: 0.3rem;
+}
+
+.planner-layout .meal-slot-label {
+    font-size: 0.6rem;
+    margin-bottom: 0;
+}
+
+.planner-layout .add-meal-icon {
+    font-size: 1rem;
+    height: 20px;
+}
+
+/* 5. Responsive Mobile */
+@media (max-width: 1024px) {
+    .planner-layout {
+        grid-template-columns: 1fr; /* Quay về 1 cột */
+    }
+    
+    .planner-layout .days-grid {
+        grid-template-columns: repeat(3, 1fr); /* Lịch chia 3 cột */
+    }
+}
+@media (max-width: 500px) {
+    .meal-slot {
+        grid-template-columns: 1fr;
+        max-width: 90px;
+    }
+    .meal-name {
+        max-width: 40px;
+        font-size: small;
+    }
+}
+/* ===================================
+   NÚT CẬP NHẬT BMI (BÊN TRONG CARD)
+   =================================== */
+
+.btn-recalc {
+    margin-top: 1rem; /* Cách dòng trạng thái BMI một chút */
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    
+    /* Màu sắc: Nền xanh nhạt, chữ xanh đậm */
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: var(--color-white);
+    border: 1px solid transparent;
+}
+
+.btn-recalc:hover {
+    background-color: var(--primary-green);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+}
+
+.btn-recalc:active {
+    transform: translateY(0);
+}
+
+/* Dark Mode Support cho nút này */
+[data-theme="dark"] .btn-recalc {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--mint-green);
+}
+
+[data-theme="dark"] .btn-recalc:hover {
+    background-color: var(--mint-green);
+    color: #1a1a2e; /* Chữ tối màu khi nền sáng */
+}
+
+/* Tinh chỉnh Responsive khi ở chế độ Compact (Planner Layout) */
+.planner-layout .btn-recalc {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
