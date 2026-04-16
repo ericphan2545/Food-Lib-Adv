@@ -31,7 +31,7 @@ body.auth-page {
   flex-direction: column;
   justify-content: flex-end;
   color: white;
-  background: url('/public/images/food_lib.jpg') center/cover no-repeat;
+  background: url('/public/img/food_lib.jpg') center/cover no-repeat;
 }
 
 .auth-left::before {

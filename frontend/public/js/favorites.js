@@ -1,5 +1,17 @@
-// Favorites page renderer (adapted from NutriPlan/js/favorites.js)
+// Trang Yêu thích — đồng bộ localStorage với recipes.js (mảng id số nguyên dương)
 (function () {
+  function normalizeFavoriteIds(raw) {
+    try {
+      const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (!Array.isArray(data)) return [];
+      return data
+        .map((x) => (typeof x === "number" ? x : parseInt(String(x), 10)))
+        .filter((n) => Number.isInteger(n) && n > 0);
+    } catch {
+      return [];
+    }
+  }
+
   function getRecipesArray() {
     const names = Object.keys(window.recipesDB || {});
     return names.map((name, idx) => ({
@@ -25,17 +37,15 @@
     },
     loadFavorites() {
       const stored = localStorage.getItem("favorites");
-      this.favoriteIds = stored ? JSON.parse(stored) : [];
+      this.favoriteIds = normalizeFavoriteIds(stored || "[]");
+      if (stored) {
+        const normalized = JSON.stringify(this.favoriteIds);
+        if (normalized !== stored) localStorage.setItem("favorites", normalized);
+      }
     },
     getFavoriteFoods() {
       const all = getRecipesArray();
       return all.filter((food) => this.favoriteIds.includes(food.id));
-    },
-    removeFavorite(foodId) {
-      this.favoriteIds = this.favoriteIds.filter((id) => id !== foodId);
-      localStorage.setItem("favorites", JSON.stringify(this.favoriteIds));
-      window.dispatchEvent(new CustomEvent("favoritesUpdated", { detail: this.favoriteIds }));
-      this.render();
     },
     render() {
       const grid = document.getElementById("favoritesGrid");
@@ -46,6 +56,7 @@
 
       if (!favorites.length) {
         grid.style.display = "none";
+        grid.innerHTML = "";
         if (emptyState) emptyState.style.display = "block";
         if (resultCount) resultCount.textContent = "Chưa có món ăn nào được yêu thích";
         return;
@@ -53,49 +64,32 @@
 
       grid.style.display = "grid";
       if (emptyState) emptyState.style.display = "none";
-      if (resultCount) resultCount.textContent = `Bạn có ${favorites.length} món yêu thích`;
+      if (resultCount) resultCount.textContent = `${favorites.length} món đang lưu`;
 
       grid.innerHTML = favorites
-        .map((food) => {
-          return `
-            <article class="food-card">
-              <div class="image-container" style="overflow:hidden; position:relative;">
+        .map(
+          (food) => `
+            <article class="food-card food-card--favorite">
+              <div class="image-container">
                 <img src="${food.image}" alt="${food.name}" class="food-image">
                 <span class="food-category-badge">${food.category || "Món ngon"}</span>
-                <div class="food-favorite favorited" data-food-id="${food.id}" style="background: #ff6b6b; cursor: pointer;">
-                  <span>❤️</span>
+                <div class="food-favorite favorited" data-food-id="${food.id}" title="Nhấn để bỏ khỏi yêu thích" role="button" tabindex="0">
+                  <span aria-hidden="true">❤️</span>
                 </div>
               </div>
               <div class="food-content">
                 <h3 class="food-name">${food.name}</h3>
                 <p class="food-description">${food.description || ""}</p>
                 <div class="food-meta">
-                  <span class="food-time">⏱️ ${food.time || ""}</span>
-                  <span class="food-difficulty">${food.difficulty || ""}</span>
+                  <span class="food-time">⏱️ ${food.time || "—"}</span>
+                  <span class="food-difficulty">${food.difficulty || "—"}</span>
                 </div>
-                <button class="view-recipe-btn" data-recipe-name="${food.name}">Xem Công Thức</button>
+                <button type="button" class="view-recipe-btn" data-recipe-name="${food.name}">Xem công thức</button>
               </div>
             </article>
-          `;
-        })
+          `
+        )
         .join("");
-
-      // remove favorite
-      grid.querySelectorAll(".food-favorite[data-food-id]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const id = parseInt(btn.getAttribute("data-food-id"), 10);
-          this.removeFavorite(id);
-        });
-      });
-
-      // open recipe modal (delegated)
-      grid.querySelectorAll(".view-recipe-btn[data-recipe-name]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const name = btn.getAttribute("data-recipe-name");
-          if (typeof window.showRecipeDetails === "function") window.showRecipeDetails(name);
-        });
-      });
     },
   };
 
@@ -103,4 +97,3 @@
     Favorites.init();
   });
 })();
-
