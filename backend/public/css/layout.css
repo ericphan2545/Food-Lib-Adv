@@ -1,0 +1,148 @@
+/* Copied from NutriPlan/css/layout.css */
+/* ===================================
+   LAYOUT.CSS - Page Layout Structure
+   =================================== */
+
+.bg-pattern {
+  background: linear-gradient(135deg, var(--soft-green) 0%, var(--white) 50%, var(--pale-green) 100%);
+  min-height: 100vh;
+}
+
+.bg-pattern::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 40% 40%, rgba(226, 245, 227, 0.2) 0%, transparent 30%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
+
+.container-sm { max-width: var(--max-width-sm); }
+
+.header {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  box-shadow: 0 4px 20px var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.main-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.section { margin-bottom: var(--spacing-2xl); }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.grid { display: grid; gap: var(--spacing-xl); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+.footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding: var(--spacing-2xl) var(--spacing-xl) var(--spacing-lg);
+  margin-top: 4rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.footer-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+  border-top: 1px solid var(--footer-border);
+  color: var(--footer-text);
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.footer-section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--white);
+}
+
+[data-theme="dark"] .footer-section h3 { color: var(--mint-green); }
+
+.footer-section a {
+  display: block;
+  color: var(--footer-text);
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.footer-section a:hover {
+  color: var(--footer-link-hover);
+  transform: translateX(5px);
+  opacity: 1;
+}
+
+.footer-section p {
+  line-height: 1.6;
+  color: var(--footer-text);
+  opacity: 0.9;
+}
+
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .header-content { flex-direction: column; text-align: center; }
+  .section-header { flex-direction: column; gap: var(--spacing-md); text-align: center; }
+  .container { padding: 0 var(--spacing-md); }
+  .main-content { padding: var(--spacing-md); }
+}
+
+@media (max-width: 600px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}
+
