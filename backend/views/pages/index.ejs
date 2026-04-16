@@ -118,6 +118,9 @@
         </div>
     </div>
 
+    <script>
+      window.CURRENT_USER = <%- JSON.stringify(currentUser || null) %>;
+    </script>
     <script src="/public/js/nav-indicator.js"></script>
     <script src="/public/js/theme.js"></script>
     <script src="/public/js/food-database.js"></script>

@@ -1537,6 +1537,7 @@
 .modal-header {
     background: var(--white);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
     /* Fix UI: căn layout header tránh chồng icon */
     display: flex;
     align-items: center;

@@ -9,6 +9,9 @@ const connectDB = require('./config/db');
 
 const userRoutes = require('./routes/userRoutes');
 const pageRoutes = require('./routes/pageRoutes');
+const foodRoutes = require('./routes/foodRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const { ensureSeeded } = require('./controllers/foodController');
 
 const app = express();
 
@@ -48,6 +51,11 @@ app.use((req, res, next) => {
 
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
+// REST API
+app.use('/api/foods', foodRoutes);
+app.use('/api/profile', profileRoutes);
+
+// Pages / Auth
 app.use('/users', userRoutes);
 app.use('/', pageRoutes);
 
@@ -55,6 +63,11 @@ const PORT = process.env.PORT || 3000;
 
 async function start() {
   await connectDB();
+  try {
+    await ensureSeeded();
+  } catch (err) {
+    console.warn('[Food] Seed lỗi (bỏ qua):', err.message);
+  }
   app.listen(PORT, () => {
     console.log(`Food-Lib-Adv running: http://localhost:${PORT}`);
   });

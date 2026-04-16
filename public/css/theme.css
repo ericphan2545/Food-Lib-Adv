@@ -1,155 +1,409 @@
-/* Copied from NutriPlan/css/theme.css */
 /* ===================================
    THEME.CSS - Dark/Light Mode Management
    =================================== */
 
+/* Default: Light Theme */
 :root {
-  --bg-primary: var(--white);
-  --bg-secondary: var(--off-white);
-  --bg-tertiary: var(--soft-green);
-  --text-primary: var(--dark-text);
-  --text-secondary: var(--gray-text);
-  --border-color: var(--pale-green);
-  --card-bg: var(--white);
-  --input-bg: var(--off-white);
-  --footer-bg: var(--primary-green);
-  --footer-text: var(--white);
-  --footer-link-hover: var(--pale-green);
-  --footer-border: rgba(255, 255, 255, 0.2);
+    /* Light Theme Colors */
+    --bg-primary: var(--white);
+    --bg-secondary: var(--off-white);
+    --bg-tertiary: var(--soft-green);
+    --text-primary: var(--dark-text);
+    --text-secondary: var(--gray-text);
+    --border-color: var(--pale-green);
+    --card-bg: var(--white);
+    --input-bg: var(--off-white);
+    --footer-bg: var(--primary-green); /* Màu xanh lá chủ đạo */
+    --footer-text: var(--white);       /* Chữ trắng */
+    --footer-link-hover: var(--pale-green); /* Màu link khi hover */
+    --footer-border: rgba(255, 255, 255, 0.2);
 }
 
+/* Dark Theme */
 [data-theme="dark"] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-tertiary: #0f3460;
-  --text-primary: #eaeaea;
-  --text-secondary: #b0b0b0;
-  --border-color: #2d4a3e;
-  --card-bg: #16213e;
-  --input-bg: #1a1a2e;
-
-  --white: #1a1a2e;
-  --off-white: #16213e;
-  --soft-green: #0f3460;
-  --pale-green: #2d4a3e;
-  --dark-text: #eaeaea;
-  --gray-text: #b0b0b0;
-  --shadow: rgba(0, 0, 0, 0.3);
-
-  --footer-bg: #0d1b15;
-  --footer-text: #b0b0b0;
-  --footer-link-hover: var(--mint-green);
-  --footer-border: rgba(255, 255, 255, 0.05);
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --text-primary: #eaeaea;
+    --text-secondary: #b0b0b0;
+    --border-color: #2d4a3e;
+    --card-bg: #16213e;
+    --input-bg: #1a1a2e;
+    
+    /* Override base colors for dark theme */
+    --white: #1a1a2e;
+    --off-white: #16213e;
+    --soft-green: #0f3460;
+    --pale-green: #2d4a3e;
+    --dark-text: #eaeaea;
+    --gray-text: #b0b0b0;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --footer-bg: #0d1b15; /* Màu xanh đen rất tối (gần như đen) */
+    --footer-text: #b0b0b0; /* Chữ xám nhạt cho đỡ chói */
+    --footer-link-hover: var(--mint-green); /* Link hover màu xanh bạc hà */
+    --footer-border: rgba(255, 255, 255, 0.05);
 }
 
+/* Dark Theme Body */
 [data-theme="dark"] body {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
 [data-theme="dark"] body::before {
-  background-image:
-    radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 40% 40%, rgba(129, 199, 132, 0.1) 0%, transparent 30%);
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 40% 40%, rgba(129, 199, 132, 0.1) 0%, transparent 30%);
 }
 
+/* Dark Theme Header */
 [data-theme="dark"] .header {
-  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
 }
 
+/* Dark Theme Cards */
 [data-theme="dark"] .card,
 [data-theme="dark"] .food-card,
 [data-theme="dark"] .search-container {
-  background: var(--card-bg);
-  border-color: var(--border-color);
+    background: var(--card-bg);
+    border-color: var(--border-color);
 }
 
+/* Dark Theme Inputs */
 [data-theme="dark"] .input-field,
 [data-theme="dark"] .search-input,
 [data-theme="dark"] .filter-select {
-  background: var(--input-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
+/* Dark Theme Filter Buttons */
 [data-theme="dark"] .filter-btn {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 [data-theme="dark"] .filter-btn:hover,
 [data-theme="dark"] .filter-btn.active {
-  background: var(--light-green);
-  color: var(--white);
+    background: var(--light-green);
+    color: var(--white);
 }
 
+/* Dark Theme Gender Options */
 [data-theme="dark"] .gender-option {
-  background: var(--input-bg);
-  border-color: var(--border-color);
+    background: var(--input-bg);
+    border-color: var(--border-color);
 }
 
 [data-theme="dark"] .gender-option.selected {
-  background: var(--bg-tertiary);
-  border-color: var(--light-green);
+    background: var(--bg-tertiary);
+    border-color: var(--light-green);
 }
 
+/* Dark Theme Nutrition Cards */
 [data-theme="dark"] .nutrition-card {
-  background: var(--input-bg);
-  border-color: var(--border-color);
+    background: var(--input-bg);
+    border-color: var(--border-color);
 }
 
+/* Dark Theme Advice Box */
 [data-theme="dark"] .advice-box,
 [data-theme="dark"] .food-suggestions {
-  background: var(--bg-tertiary);
+    background: var(--bg-tertiary);
 }
 
+/* Dark Theme Food Tags */
 [data-theme="dark"] .food-tag {
-  background: var(--input-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
+/* Dark Theme Footer */
+[data-theme="dark"] .footer {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+}
+
+/* Recipe Modal Styles */
+.modal-overlay {
+    display: none; /* Ẩn mặc định */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 110%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6); /* Màu nền đen mờ */
+    backdrop-filter: blur(5px); /* Hiệu ứng mờ background */
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background-color: var(--card-bg, #fff); /* Tương thích với dark mode nếu có biến này */
+    color: var(--text-primary, #333);
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s;
+}
+
+/* Nút đóng (X) */
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #ff4757;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Style cho nội dung bên trong Modal */
+.recipe-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.recipe-title {
+    font-size: 2rem;
+    color: #ff4757;
+    margin-bottom: 0.5rem;
+}
+
+.recipe-image-large {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.recipe-section {
+    margin-bottom: 1.5rem;
+}
+
+.recipe-section h4 {
+    color: #2f3542;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #ff4757;
+    padding-left: 10px;
+}
+
+.recipe-list {
+    list-style-type: disc;
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+.recipe-steps {
+    list-style-type: decimal;
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+.recipe-steps li {
+    margin-bottom: 10px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+/* Theme Toggle Button */
 .theme-toggle {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-green), var(--light-green));
-  color: var(--white);
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 15px var(--shadow);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  transition: var(--transition-normal);
-  z-index: 1000;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: var(--transition-normal);
+    z-index: 1000;
 }
 
 .theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px var(--shadow);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px var(--shadow);
 }
 
-.theme-toggle .icon-light { display: block; }
-.theme-toggle .icon-dark { display: none; }
+/* Light mode icon */
+.theme-toggle .icon-light {
+    display: block;
+}
 
-[data-theme="dark"] .theme-toggle .icon-light { display: none; }
-[data-theme="dark"] .theme-toggle .icon-dark { display: block; }
+.theme-toggle .icon-dark {
+    display: none;
+}
 
+/* Dark mode icon */
+[data-theme="dark"] .theme-toggle .icon-light {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle .icon-dark {
+    display: block;
+}
+
+/* Smooth transition for theme change */
 *,
 *::before,
 *::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease;
 }
 
+/* Disable transition on page load */
 .no-transition *,
 .no-transition *::before,
 .no-transition *::after {
-  transition: none !important;
+    transition: none !important;
 }
 
+/* Print styles - always use light theme */
+@media print {
+    :root {
+        --bg-primary: #fff;
+        --bg-secondary: #f5f5f5;
+        --text-primary: #000;
+        --text-secondary: #333;
+    }
+    
+    .theme-toggle {
+        display: none;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+/* System preference detection */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg-primary: #1a1a2e;
+        --bg-secondary: #16213e;
+        --bg-tertiary: #0f3460;
+        --text-primary: #eaeaea;
+        --text-secondary: #b0b0b0;
+        --border-color: #2d4a3e;
+        --card-bg: #16213e;
+        --input-bg: #1a1a2e;
+    }
+}
+
+/* ===================================
+   MODAL ACTION BUTTONS (MỚI)
+   =================================== */
+
+/* 1. Container định vị góc phải */
+
+
+/* 2. Style chung cho cả 2 nút (Tròn, nổi) */
+.modal-btn {
+    position: absolute; /* Định vị tuyệt đối so với modal-content */
+    top: 15px;          /* Cả 2 nút đều cách mép trên 15px */
+    z-index: 100;       /* Nổi lên trên ảnh */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--white, #ffffff);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    outline: none;
+}
+
+/* Hiệu ứng hover chung */
+/* .modal-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+} */
+
+/* 3. Định vị riêng cho nút Yêu thích (GÓC TRÁI) */
+.favorite-btn {
+    left: 15px; /* Cách mép trái 15px */
+    color: #ccc;
+}
+
+.favorite-btn:hover {
+    color: #ff6b6b;
+}
+
+.favorite-btn.favorited {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.favorite-btn span {
+    margin-top: 2px;
+}
+
+/* 4. Định vị riêng cho nút Đóng (GÓC PHẢI) */
+.close-modal {
+    right: 15px; /* Cách mép phải 15px */
+    color: #666;
+}
+
+.close-modal:hover {
+    background-color: #ff4757;
+    color: white;
+}
+
+.close-modal span {
+    margin-top: -2px; 
+    line-height: 1;
+    font-size: 24px;
+}
+
+/* Hỗ trợ Dark Mode */
+[data-theme="dark"] .modal-btn {
+    background-color: var(--bg-secondary, #2d3436);
+    color: var(--text-primary, #dfe6e9);
+}
+[data-theme="dark"] .close-modal:hover {
+    background-color: #ff4757;
+    color: white;
+}

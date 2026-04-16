@@ -6,9 +6,9 @@
 // Import images so Vite can process them correctly
 
 // Helper function to get base path
-// Lưu ý: Không dùng `import.meta` vì file này được load như script thường (không phải module)
-// trong Express/EJS → dùng `import.meta` sẽ gây SyntaxError và làm hỏng toàn bộ trang Favorites.
 function getBasePath() {
+  // NOTE: file này được load như script thường (EJS/Express),
+  // nên không dùng `import.meta` (sẽ gây SyntaxError trên browser).
   const path = window.location.pathname || "/";
   if (path.startsWith("/NutriPlan/")) return "/NutriPlan/";
   return "/";

@@ -79,59 +79,22 @@ async function updateProfile(req, res) {
     if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
 
     const { gender, age, height, weight, activityLevel } = req.body;
-    if (
-      gender == null ||
-      age == null ||
-      height == null ||
-      weight == null ||
-      activityLevel == null ||
-      String(gender).trim() === '' ||
-      String(age).trim?.() === '' ||
-      String(height).trim?.() === '' ||
-      String(weight).trim?.() === '' ||
-      String(activityLevel).trim() === ''
-    ) {
+    if (!gender || !age || !height || !weight || !activityLevel) {
       return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
     }
     if (!['male', 'female'].includes(gender)) {
       return res.status(400).json({ error: 'Giới tính không hợp lệ' });
     }
-
-    const ageNum = Number(age);
-    const heightNum = Number(height);
-    const weightNum = Number(weight);
-
-    // Bug 1 fix: chặn NaN/Infinity trước khi so sánh range
-    if (!Number.isFinite(ageNum) || !Number.isFinite(heightNum) || !Number.isFinite(weightNum)) {
-      return res.status(400).json({ error: 'Tuổi/chiều cao/cân nặng phải là số hợp lệ' });
-    }
-
-    if (
-      ageNum < 10 ||
-      ageNum > 100 ||
-      heightNum < 100 ||
-      heightNum > 250 ||
-      weightNum < 30 ||
-      weightNum > 300
-    ) {
+    if (age < 10 || age > 100 || height < 100 || height > 250 || weight < 30 || weight > 300) {
       return res.status(400).json({ error: 'Giá trị không nằm trong khoảng an toàn' });
     }
 
-    const profile = computeProfile({
-      gender,
-      age: ageNum,
-      height: heightNum,
-      weight: weightNum,
-      activityLevel,
-    });
+    const profile = computeProfile({ gender, age, height, weight, activityLevel });
     const user = await User.findByIdAndUpdate(
       req.session.user.id,
       { profile },
       { new: true },
     ).lean();
-
-    // Bug 2 fix: user có thể null nếu record bị xoá giữa chừng
-    if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.json({ profile: user.profile });
   } catch (err) {

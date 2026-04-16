@@ -539,9 +539,12 @@ const RecipeManager = {
 
     bindGridEvents() {
         const getFoodIdFromCard = (card) => {
-            const idAttr = card?.querySelector?.(".food-favorite")?.getAttribute?.("data-food-id");
+            if (!card) return null;
+            const heart = card.querySelector(".food-favorite");
+            const idAttr = heart?.getAttribute?.("data-food-id");
             const id = Number(idAttr);
             if (Number.isFinite(id) && id > 0) return id;
+
             // fallback: tính theo thứ tự recipesDB (tương thích dữ liệu hiện tại)
             const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
             const foodNames = Object.keys(recipesDB);
@@ -553,8 +556,10 @@ const RecipeManager = {
             let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
             const index = favorites.indexOf(foodId);
             const isFav = index >= 0;
+
             if (isFav) favorites.splice(index, 1);
             else favorites.push(foodId);
+
             localStorage.setItem("favorites", JSON.stringify(favorites));
 
             if (heartEl) {
@@ -583,8 +588,9 @@ const RecipeManager = {
                 return;
             }
 
-            if (e.target.classList.contains("view-recipe-btn")) {
-                const card = e.target.closest(".food-card");
+            const viewBtn = e.target.closest?.(".view-recipe-btn");
+            if (viewBtn) {
+                const card = viewBtn.closest(".food-card");
                 const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
                 if (foodName) this.showDetails(foodName);
             }
