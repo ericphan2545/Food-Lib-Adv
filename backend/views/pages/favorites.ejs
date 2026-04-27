@@ -12,22 +12,7 @@
     <link rel="stylesheet" href="/public/css/favorites.css">
 </head>
 <body class="bg-pattern">
-    <header class="header">
-        <div class="header-content">
-            <a href="/" class="logo" style="text-decoration: none; color: inherit;">
-                <div class="logo-icon">🍳</div>
-                <h1>Food<span>Library</span></h1>
-            </a>
-            <nav class="nav">
-                <ul>
-                    <li><a href="/">Trang Chủ</a></li>
-                    <li><a href="/meal-planner">Lập Thực Đơn</a></li>
-                    <li><a href="/favorites">Yêu Thích</a></li>
-                    <li><a href="/users/logout">Đăng xuất</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <%- include('../partials/header') %>
 
     <main class="main-content favorites-page">
         <section class="favorites-hero" aria-labelledby="favorites-heading">
@@ -52,37 +37,7 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>🍳 FoodLibrary</h3>
-                <p>Khám phá hàng ngàn công thức nấu ăn từ khắp nơi trên thế giới. Nấu ăn ngon mỗi ngày cùng chúng tôi!</p>
-            </div>
-            <div class="footer-section">
-                <h3>Danh Mục</h3>
-                <a href="#">Món Việt Nam</a>
-                <a href="#">Món Châu Á</a>
-                <a href="#">Món Châu Âu</a>
-                <a href="#">Tráng Miệng</a>
-            </div>
-            <div class="footer-section">
-                <h3>Liên Kết</h3>
-                <a href="#">Về Chúng Tôi</a>
-                <a href="#">Liên Hệ</a>
-                <a href="#">Chính Sách</a>
-                <a href="#">FAQ</a>
-            </div>
-            <div class="footer-section">
-                <h3>Liên Hệ</h3>
-                <p>📧 contact@foodlibrary.vn</p>
-                <p>📞 0909 090 909</p>
-                <p>📍 Đà Nẵng, Việt Nam</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 FoodLibrary. Tất cả quyền được bảo lưu.</p>
-        </div>
-    </footer>
+    <%- include('../partials/footer') %>
 
     <button class="theme-toggle" aria-label="Toggle theme">
         <span class="icon-light">🌙</span>
@@ -109,6 +64,7 @@
     <script src="/public/js/theme.js"></script>
     <script src="/public/js/food-database.js"></script>
     <script src="/public/js/recipes.js"></script>
+    <script src="/public/js/recipes-ui.js"></script>
     <script src="/public/js/favorites.js"></script>
 </body>
 </html>
