@@ -92,8 +92,8 @@ async function updateProfile(req, res) {
     const profile = computeProfile({ gender, age, height, weight, activityLevel });
     const user = await User.findByIdAndUpdate(
       req.session.user.id,
-      { profile },
-      { new: true },
+      { $set: { profile } },
+      { new: true, runValidators: true },
     ).lean();
 
     res.json({ profile: user.profile });

@@ -3,7 +3,11 @@ const foodSeed = require('../data/foodSeed');
 
 function toPublicFood(foodDoc) {
   if (!foodDoc) return null;
-  const { _id, __v, createdAt, updatedAt, ...rest } = foodDoc;
+  const source =
+    typeof foodDoc.toObject === 'function'
+      ? foodDoc.toObject({ versionKey: false })
+      : foodDoc;
+  const { _id, __v, createdAt, updatedAt, ...rest } = source;
   return rest;
 }
 
@@ -67,14 +71,11 @@ async function getFood(req, res) {
 
 async function createFood(req, res) {
   try {
-    if (req.body.id !== undefined) {
-      const incomingId = parseFoodId(req.body.id);
-      if (!incomingId) return res.status(400).json({ error: 'ID món ăn không hợp lệ' });
-    }
-
     const max = await Food.findOne({}).sort({ id: -1 }).lean();
     const nextId = (max?.id || 0) + 1;
-    const food = await Food.create({ ...req.body, id: req.body.id || nextId });
+    const payload = { ...req.body };
+    delete payload.id;
+    const food = await Food.create({ ...payload, id: nextId });
     res.status(201).json(toPublicFood(food.toObject()));
   } catch (err) {
     res.status(400).json({ error: err.message });

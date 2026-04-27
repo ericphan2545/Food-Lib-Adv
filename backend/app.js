@@ -2,7 +2,8 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
-const { MongoStore } = require('connect-mongo');
+const connectMongo = require('connect-mongo');
+const MongoStore = connectMongo.default || connectMongo;
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const connectDB = require('./config/db');

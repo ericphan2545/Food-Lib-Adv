@@ -1,10 +1,24 @@
 // ==========================================================================
 // RECIPE MANAGER UI LOGIC
-// Depends on window.RECIPES_DB from recipes.js
+// Uses /api/foods as canonical data source and RECIPES_DB for recipe details.
 // ==========================================================================
-const recipesDB = (typeof window !== "undefined" && window.RECIPES_DB) ? window.RECIPES_DB : {};
+const recipeDetailsDb = (typeof window !== "undefined" && window.RECIPES_DB) ? window.RECIPES_DB : {};
+const CATEGORY_LABELS = {
+    carbs: "Tinh bột",
+    protein: "Đạm",
+    fat: "Chất béo",
+    fiber: "Chất xơ",
+    balanced: "Cân bằng"
+};
+const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='240'><rect width='100%' height='100%' fill='#f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#9ca3af' font-size='20'>Food Library</text></svg>"
+);
 
 const RecipeManager = {
+    foods: [],
+    foodById: new Map(),
+    foodByName: new Map(),
+    currentModalFoodId: null,
     // Lưu trữ các DOM elements cần thiết
     elements: {
         modal: null,
@@ -23,23 +37,59 @@ const RecipeManager = {
     // State: Lưu trạng thái lọc hiện tại
     currentFilters: {
         search: "",
-        category: "Tất cả",
+        category: "all",
         difficulty: "all",
         time: "all"
     },
 
-    getFoodIdByName(foodName) {
-        if (typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE)) {
-            const match = FOOD_DATABASE.find((f) => f.name === foodName);
-            if (match && Number.isFinite(match.id)) return match.id;
+    async loadFoods() {
+        try {
+            const res = await fetch("/api/foods");
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    this.foods = data;
+                    this.foodById = new Map(data.map((food) => [food.id, food]));
+                    this.foodByName = new Map(data.map((food) => [food.name, food]));
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Không thể tải /api/foods:", err);
         }
-        const fallbackNames = Object.keys(recipesDB);
+
+        if (typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE)) {
+            this.foods = FOOD_DATABASE;
+            this.foodById = new Map(FOOD_DATABASE.map((food) => [food.id, food]));
+            this.foodByName = new Map(FOOD_DATABASE.map((food) => [food.name, food]));
+            return;
+        }
+
+        const fallbackFoods = Object.keys(recipeDetailsDb).map((name, index) => ({
+            id: index + 1,
+            name,
+            category: "balanced",
+            calories: 0,
+            carbs: 0,
+            protein: 0,
+            fat: 0
+        }));
+        this.foods = fallbackFoods;
+        this.foodById = new Map(fallbackFoods.map((food) => [food.id, food]));
+        this.foodByName = new Map(fallbackFoods.map((food) => [food.name, food]));
+    },
+
+    getFoodIdByName(foodName) {
+        const match = this.foodByName.get(foodName);
+        if (match && Number.isFinite(match.id)) return match.id;
+        const fallbackNames = Object.keys(recipeDetailsDb);
         const fallbackIndex = fallbackNames.indexOf(foodName);
         return fallbackIndex >= 0 ? fallbackIndex + 1 : null;
     },
 
     // --- KHỞI TẠO ---
-    init() {
+    async init() {
+        await this.loadFoods();
         this.cacheElements();
         this.bindEvents();
         this.renderFoodCards();
@@ -65,6 +115,32 @@ const RecipeManager = {
         this.bindModalEvents();
         this.bindSearchAndFilterEvents();
         this.bindGridEvents();
+        window.addEventListener("favoritesUpdated", () => {
+            this.refreshFavoriteIndicators();
+            this.syncModalFavoriteBtn();
+        });
+        window.addEventListener("storage", () => {
+            this.refreshFavoriteIndicators();
+            this.syncModalFavoriteBtn();
+        });
+    },
+
+    getFavorites() {
+        let raw = [];
+        try {
+            raw = JSON.parse(localStorage.getItem("favorites") || "[]");
+        } catch (err) {
+            console.warn("favorites trong localStorage không hợp lệ, reset lại:", err);
+            localStorage.setItem("favorites", "[]");
+        }
+        if (!Array.isArray(raw)) return [];
+        return [...new Set(raw.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))];
+    },
+
+    saveFavorites(favorites) {
+        const normalized = [...new Set(favorites.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))];
+        localStorage.setItem("favorites", JSON.stringify(normalized));
+        return normalized;
     },
 
     bindModalEvents() {
@@ -84,20 +160,20 @@ const RecipeManager = {
             if (Number.isFinite(id) && id > 0) return id;
 
             const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
-            const foodNames = Object.keys(recipesDB);
+            const foodNames = Object.keys(recipeDetailsDb);
             const idx = foodNames.indexOf(foodName);
             return idx >= 0 ? idx + 1 : null;
         };
 
         const toggleFavoriteById = (foodId, heartEl) => {
-            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+            let favorites = this.getFavorites();
             const index = favorites.indexOf(foodId);
             const isFav = index >= 0;
 
             if (isFav) favorites.splice(index, 1);
             else favorites.push(foodId);
 
-            localStorage.setItem("favorites", JSON.stringify(favorites));
+            favorites = this.saveFavorites(favorites);
 
             if (heartEl) {
                 if (!isFav) {
@@ -153,7 +229,7 @@ const RecipeManager = {
             btn.addEventListener("click", () => {
                 document.querySelector(".filter-btn.active")?.classList.remove("active");
                 btn.classList.add("active");
-                this.currentFilters.category = btn.innerText.trim();
+                this.currentFilters.category = btn.dataset.category || "all";
                 this.renderFoodCards();
             });
         });
@@ -173,59 +249,71 @@ const RecipeManager = {
 
     showDetails(foodName) {
         const { modal, modalBody } = this.elements;
-        const recipe = recipesDB[foodName];
+        const recipe = recipeDetailsDb[foodName];
+        const food = this.foodByName.get(foodName);
         const foodId = this.getFoodIdByName(foodName);
+        this.currentModalFoodId = foodId;
 
-        if (recipe && modal && modalBody) {
-            const ingredientsHtml = recipe.ingredients.map((item) => `<li>${item}</li>`).join("");
-            const instructionsHtml = recipe.instructions.map((step) => `<li>${step}</li>`).join("");
+        if (modal && modalBody) {
+            const ingredients = Array.isArray(recipe?.ingredients) ? recipe.ingredients : [];
+            const instructions = Array.isArray(recipe?.instructions) ? recipe.instructions : [];
+            const ingredientsHtml = ingredients.map((item) => `<li>${item}</li>`).join("");
+            const instructionsHtml = instructions.map((step) => `<li>${step}</li>`).join("");
 
             let nutritionHtml = "";
-            if (typeof FOOD_DATABASE !== "undefined") {
-                const nutritionData = FOOD_DATABASE.find((f) => f.name === foodName);
-                if (nutritionData) {
-                    nutritionHtml = `
-                        <div class="nutrition-box-under-img">
-                            <h4 class="nutrition-title-small">Dinh dưỡng (1 khẩu phần)</h4>
-                            <div class="nutrition-grid-small">
-                                <div class="nutri-item">
-                                    <span class="nutri-val">${nutritionData.calories}</span>
-                                    <span class="nutri-label">Kcal</span>
-                                </div>
-                                <div class="nutri-item">
-                                    <span class="nutri-val">${nutritionData.carbs}g</span>
-                                    <span class="nutri-label">Carbs</span>
-                                </div>
-                                <div class="nutri-item">
-                                    <span class="nutri-val">${nutritionData.protein}g</span>
-                                    <span class="nutri-label">Protein</span>
-                                </div>
-                                <div class="nutri-item">
-                                    <span class="nutri-val">${nutritionData.fat}g</span>
-                                    <span class="nutri-label">Fat</span>
-                                </div>
+            if (food) {
+                nutritionHtml = `
+                    <div class="nutrition-box-under-img">
+                        <h4 class="nutrition-title-small">Dinh dưỡng (1 khẩu phần)</h4>
+                        <div class="nutrition-grid-small">
+                            <div class="nutri-item">
+                                <span class="nutri-val">${food.calories ?? 0}</span>
+                                <span class="nutri-label">Kcal</span>
+                            </div>
+                            <div class="nutri-item">
+                                <span class="nutri-val">${food.carbs ?? 0}g</span>
+                                <span class="nutri-label">Carbs</span>
+                            </div>
+                            <div class="nutri-item">
+                                <span class="nutri-val">${food.protein ?? 0}g</span>
+                                <span class="nutri-label">Protein</span>
+                            </div>
+                            <div class="nutri-item">
+                                <span class="nutri-val">${food.fat ?? 0}g</span>
+                                <span class="nutri-label">Fat</span>
                             </div>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             }
+
+            const imageSrc = recipe?.image || FALLBACK_IMG;
+            const contentHtml = recipe
+                ? `
+                    <div class="recipe-section ingredients-box">
+                        <h4 class="section-title-small">🛒 Nguyên Liệu:</h4>
+                        <ul class="recipe-list">${ingredientsHtml}</ul>
+                    </div>
+                    <div class="recipe-section">
+                        <h4 class="section-title-simple">👩‍🍳 Cách Làm:</h4>
+                        <ol class="recipe-steps">${instructionsHtml}</ol>
+                    </div>
+                `
+                : `
+                    <div class="recipe-section">
+                        <p>Chưa có công thức chi tiết cho món này, nhưng dữ liệu dinh dưỡng đã được đồng bộ từ API.</p>
+                    </div>
+                `;
 
             modalBody.innerHTML = `
                 <div class="recipe-detail-layout">
                     <div class="recipe-column recipe-col-image">
-                        <img src="${recipe.image}" alt="${foodName}" class="recipe-detail-image">
+                        <img src="${imageSrc}" alt="${foodName}" class="recipe-detail-image">
                         ${nutritionHtml}
                     </div>
                     <div class="recipe-column recipe-col-content">
                         <h2 class="recipe-title-large">${foodName}</h2>
-                        <div class="recipe-section ingredients-box">
-                            <h4 class="section-title-small">🛒 Nguyên Liệu:</h4>
-                            <ul class="recipe-list">${ingredientsHtml}</ul>
-                        </div>
-                        <div class="recipe-section">
-                            <h4 class="section-title-simple">👩‍🍳 Cách Làm:</h4>
-                            <ol class="recipe-steps">${instructionsHtml}</ol>
-                        </div>
+                        ${contentHtml}
                     </div>
                 </div>
             `;
@@ -237,8 +325,6 @@ const RecipeManager = {
                 modal.classList.add("show");
             }, 10);
             document.body.style.overflow = "hidden";
-        } else {
-            alert(`Chưa có công thức cho món này: ${foodName}`);
         }
     },
 
@@ -251,6 +337,7 @@ const RecipeManager = {
                 document.body.style.overflow = "auto";
             }, 300);
         }
+        this.currentModalFoodId = null;
     },
 
     handleModalFavoriteBtn(foodId) {
@@ -259,8 +346,9 @@ const RecipeManager = {
             const newBtn = oldBtn.cloneNode(true);
             oldBtn.parentNode.replaceChild(newBtn, oldBtn);
 
-            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+            let favorites = this.getFavorites();
             const isFavorite = favorites.includes(foodId);
+            newBtn.setAttribute("data-food-id", String(foodId));
 
             if (isFavorite) {
                 newBtn.classList.add("favorited");
@@ -272,7 +360,7 @@ const RecipeManager = {
 
             newBtn.addEventListener("click", function (e) {
                 e.stopPropagation();
-                favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+                favorites = RecipeManager.getFavorites();
                 const index = favorites.indexOf(foodId);
 
                 if (index > -1) {
@@ -284,11 +372,44 @@ const RecipeManager = {
                     this.classList.add("favorited");
                     this.style.background = "#ff6b6b";
                 }
-                localStorage.setItem("favorites", JSON.stringify(favorites));
-                window.dispatchEvent(new CustomEvent("favoritesUpdated"));
+                favorites = RecipeManager.saveFavorites(favorites);
+                window.dispatchEvent(new CustomEvent("favoritesUpdated", { detail: favorites }));
                 window.dispatchEvent(new Event("storage"));
             });
         }
+    },
+
+    syncModalFavoriteBtn() {
+        const modalBtn = document.querySelector("#recipe-modal .food-favorite");
+        if (!modalBtn || !this.currentModalFoodId) return;
+        const favorites = this.getFavorites();
+        const isFav = favorites.includes(this.currentModalFoodId);
+        if (isFav) {
+            modalBtn.classList.add("favorited");
+            modalBtn.style.background = "#ff6b6b";
+        } else {
+            modalBtn.classList.remove("favorited");
+            modalBtn.style.background = "var(--white)";
+        }
+    },
+
+    refreshFavoriteIndicators() {
+        const { foodGrid } = this.elements;
+        if (!foodGrid) return;
+        const favorites = this.getFavorites();
+        const heartEls = foodGrid.querySelectorAll(".food-favorite[data-food-id]");
+        heartEls.forEach((heartEl) => {
+            const id = Number(heartEl.getAttribute("data-food-id"));
+            if (!Number.isFinite(id) || id <= 0) return;
+            const isFav = favorites.includes(id);
+            if (isFav) {
+                heartEl.classList.add("favorited");
+                heartEl.style.background = "#ff6b6b";
+            } else {
+                heartEl.classList.remove("favorited");
+                heartEl.style.background = "var(--white)";
+            }
+        });
     },
 
     parseTime(timeString) {
@@ -297,12 +418,15 @@ const RecipeManager = {
         return matches ? parseInt(matches[0], 10) : 0;
     },
 
-    isMatch(foodName, recipe) {
+    isMatch(food, recipe) {
+        const foodName = food.name || "";
         const searchTerm = this.currentFilters.search.toLowerCase();
         if (searchTerm && !foodName.toLowerCase().includes(searchTerm)) return false;
-        if (this.currentFilters.category !== "Tất cả" && recipe.category !== this.currentFilters.category) return false;
-        if (this.currentFilters.difficulty !== "all" && recipe.difficulty !== this.currentFilters.difficulty) return false;
+        if (this.currentFilters.category !== "all" && food.category !== this.currentFilters.category) return false;
+        if (this.currentFilters.difficulty !== "all" && recipe && recipe.difficulty !== this.currentFilters.difficulty) return false;
+        if (this.currentFilters.difficulty !== "all" && !recipe) return false;
         if (this.currentFilters.time !== "all") {
+            if (!recipe) return false;
             const minutes = this.parseTime(recipe.time);
             if (this.currentFilters.time === "under_30" && minutes >= 30) return false;
             if (this.currentFilters.time === "30_60" && (minutes < 30 || minutes > 60)) return false;
@@ -317,30 +441,36 @@ const RecipeManager = {
 
         foodGrid.innerHTML = "";
         let count = 0;
-        const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        const favorites = this.getFavorites();
 
-        for (const foodName in recipesDB) {
-            const recipe = recipesDB[foodName];
-            if (this.isMatch(foodName, recipe)) {
+        for (const food of this.foods) {
+            const foodName = food.name;
+            const recipe = recipeDetailsDb[foodName] || null;
+            if (this.isMatch(food, recipe)) {
                 count++;
-                const foodId = this.getFoodIdByName(foodName);
+                const foodId = food.id;
                 const isFav = favorites.includes(foodId);
                 const heartStyle = isFav ? 'style="background: #ff6b6b;"' : "";
                 const heartClass = isFav ? "favorited" : "";
+                const displayCategory = recipe?.category || CATEGORY_LABELS[food.category] || "Món ngon";
+                const displayDescription = recipe?.description || "Món ăn hấp dẫn.";
+                const displayTime = recipe?.time || "Chưa cập nhật";
+                const displayDifficulty = recipe?.difficulty || "N/A";
+                const imageSrc = recipe?.image || FALLBACK_IMG;
 
                 const cardHTML = `
                     <article class="food-card">
                         <div class="image-container">
-                            <img src="${recipe.image}" alt="${foodName}" class="food-image">
-                            <span class="food-category-badge">${recipe.category || "Món Ngon"}</span>
+                            <img src="${imageSrc}" alt="${foodName}" class="food-image">
+                            <span class="food-category-badge">${displayCategory}</span>
                             <div class="food-favorite ${heartClass}" data-food-id="${foodId}" ${heartStyle}><span>❤️</span></div>
                         </div>
                         <div class="food-content">
                             <h3 class="food-name">${foodName}</h3>
-                            <p class="food-description">${recipe.description || "Món ăn hấp dẫn."}</p>
+                            <p class="food-description">${displayDescription}</p>
                             <div class="food-meta">
-                                <span class="food-time">⏱️ ${recipe.time || "30 phút"}</span>
-                                <span class="food-difficulty">${recipe.difficulty || "Dễ"}</span>
+                                <span class="food-time">⏱️ ${displayTime}</span>
+                                <span class="food-difficulty">${displayDifficulty}</span>
                             </div>
                             <button class="view-recipe-btn">Xem Công Thức</button>
                         </div>

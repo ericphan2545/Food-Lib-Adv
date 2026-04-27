@@ -56,6 +56,10 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => res.redirect('/users/login'));
+  req.session.destroy((err) => {
+    if (err) return res.status(500).send('Không thể đăng xuất');
+    res.clearCookie('connect.sid');
+    return res.redirect('/users/login');
+  });
 };
 

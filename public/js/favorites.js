@@ -10,6 +10,16 @@ function getBasePath() {
 }
 
 const imageMap = {};
+const FAV_CATEGORY_LABELS = {
+  carbs: "Tinh bột",
+  protein: "Đạm",
+  fat: "Chất béo",
+  fiber: "Chất xơ",
+  balanced: "Cân bằng",
+};
+const FAV_FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='240'><rect width='100%' height='100%' fill='#f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#9ca3af' font-size='20'>Food Library</text></svg>",
+);
 
 function getRecipesSource() {
   if (typeof window !== "undefined" && window.RECIPES_DB) {
@@ -18,26 +28,29 @@ function getRecipesSource() {
   return {};
 }
 
-function toFoodDatabase(recipesSource) {
-  const foodIdByName =
-    typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE)
-      ? new Map(FOOD_DATABASE.map((food) => [food.name, food.id]))
-      : new Map();
-
-  return Object.entries(recipesSource).map(([name, data], index) => {
-    const stableId = foodIdByName.get(name);
-    return {
-      id: Number.isFinite(stableId) ? stableId : index + 1,
-      name,
-      ...data,
-    };
-  });
-}
-
 const Favorites = {
   favoriteIds: [],
+  foods: [],
 
-  init() {
+  normalizeIds(ids) {
+    if (!Array.isArray(ids)) return [];
+    return [...new Set(ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))];
+  },
+
+  safeReadFavorites() {
+    const storedFavorites = localStorage.getItem("favorites");
+    if (!storedFavorites) return [];
+    try {
+      return JSON.parse(storedFavorites);
+    } catch (err) {
+      console.warn("favorites trong localStorage không hợp lệ, reset lại:", err);
+      localStorage.setItem("favorites", "[]");
+      return [];
+    }
+  },
+
+  async init() {
+    await this.loadFoods();
     this.loadFavorites();
     this.renderFavorites();
     window.addEventListener("storage", () => {
@@ -50,19 +63,45 @@ const Favorites = {
     });
   },
 
+  async loadFoods() {
+    try {
+      const res = await fetch("/api/foods");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          this.foods = data;
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Không thể tải /api/foods:", err);
+    }
+    this.foods =
+      typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE)
+        ? FOOD_DATABASE
+        : [];
+    if (this.foods.length === 0) {
+      const recipesSource = getRecipesSource();
+      this.foods = Object.keys(recipesSource).map((name, index) => ({
+        id: index + 1,
+        name,
+        category: "balanced",
+      }));
+    }
+  },
+
   loadFavorites() {
-    const storedFavorites = localStorage.getItem("favorites");
-    this.favoriteIds = storedFavorites ? JSON.parse(storedFavorites) : [];
+    this.favoriteIds = this.normalizeIds(this.safeReadFavorites());
+    localStorage.setItem("favorites", JSON.stringify(this.favoriteIds));
   },
 
   getFavoriteFoods() {
-    const recipesSource = getRecipesSource();
-    const foodDatabase = toFoodDatabase(recipesSource);
-    return foodDatabase.filter((food) => this.favoriteIds.includes(food.id));
+    return this.foods.filter((food) => this.favoriteIds.includes(food.id));
   },
 
   removeFavorite(foodId) {
-    this.favoriteIds = this.favoriteIds.filter((id) => id !== foodId);
+    const normalizedFoodId = Number(foodId);
+    this.favoriteIds = this.favoriteIds.filter((id) => id !== normalizedFoodId);
     localStorage.setItem("favorites", JSON.stringify(this.favoriteIds));
     this.renderFavorites();
     window.dispatchEvent(
@@ -82,17 +121,19 @@ const Favorites = {
     if (favoriteFoods.length === 0) {
       grid.style.display = "none";
       emptyState.style.display = "block";
-      resultCount.textContent = "";
+      resultCount.textContent = "Chưa có món ăn nào được yêu thích";
       return;
     }
 
     grid.style.display = "grid";
     emptyState.style.display = "none";
-    resultCount.textContent = "";
+    resultCount.textContent = `${favoriteFoods.length} món ăn yêu thích`;
+    const recipesSource = getRecipesSource();
 
     grid.innerHTML = favoriteFoods
       .map((food) => {
-        let imagePath = food.image;
+        const recipe = recipesSource[food.name] || {};
+        let imagePath = recipe.image || FAV_FALLBACK_IMG;
         if (imageMap[food.id]) {
           imagePath = imageMap[food.id];
         } else if (
@@ -107,17 +148,17 @@ const Favorites = {
             <article class="food-card">
                 <div class="image-container">
                     <img src="${imagePath}" alt="${food.name}" class="food-image">
-                    <span class="food-category-badge">${food.category}</span>
+                    <span class="food-category-badge">${recipe.category || FAV_CATEGORY_LABELS[food.category] || "Món ngon"}</span>
                     <div class="food-favorite favorited" data-food-id="${food.id}" style="background: #ff6b6b; cursor: pointer;">
                         <span>❤️</span>
                     </div>
                 </div>
                 <div class="food-content">
                     <h3 class="food-name">${food.name}</h3>
-                    <p class="food-description">${food.description}</p>
+                    <p class="food-description">${recipe.description || "Món ăn đang được cập nhật công thức."}</p>
                     <div class="food-meta">
-                        <span class="food-time">⏱️ ${food.time}</span>
-                        <span class="food-difficulty">${food.difficulty}</span>
+                        <span class="food-time">⏱️ ${recipe.time || "Chưa cập nhật"}</span>
+                        <span class="food-difficulty">${recipe.difficulty || "N/A"}</span>
                     </div>
                     <button class="view-recipe-btn">Xem Công Thức</button>
                 </div>
@@ -140,12 +181,26 @@ const Favorites = {
         this.removeFavorite(foodId);
       });
     });
+
+    const detailButtons = document.querySelectorAll(".view-recipe-btn");
+    detailButtons.forEach((btn) => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const card = newBtn.closest(".food-card");
+        const foodName = card?.querySelector(".food-name")?.innerText?.trim();
+        if (foodName && typeof window.showRecipeDetails === "function") {
+          window.showRecipeDetails(foodName);
+        }
+      });
+    });
   },
 };
 
 window.Favorites = Favorites;
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("favoritesGrid")) {
-    Favorites.init();
+    Favorites.init().catch((err) => console.error("Favorites init error:", err));
   }
 });
