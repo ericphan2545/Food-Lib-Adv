@@ -100,6 +100,21 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function getFriendlyAiErrorMessage(reason) {
+  const text = String(reason || '').toLowerCase();
+  if (!text) return 'AI tạm thời chưa sẵn sàng, hệ thống đã dùng gợi ý dự phòng.';
+  if (text.includes('quota') || text.includes('too many requests') || text.includes('429')) {
+    return 'AI đang vượt giới hạn sử dụng tạm thời, hệ thống đã chuyển sang gợi ý dự phòng.';
+  }
+  if (text.includes('503') || text.includes('service unavailable') || text.includes('high demand')) {
+    return 'AI đang quá tải, hệ thống đã chuyển sang gợi ý dự phòng.';
+  }
+  if (text.includes('json')) {
+    return 'AI trả dữ liệu chưa đúng định dạng, hệ thống đã dùng gợi ý dự phòng ổn định hơn.';
+  }
+  return 'AI tạm thời chưa sẵn sàng, hệ thống đã dùng gợi ý dự phòng.';
+}
+
 async function saveAiHistory(userId, payload) {
   if (!userId || !payload) return;
   try {
@@ -172,7 +187,7 @@ function createLocalFallbackPlan({ bmi, targetCalories, ingredients, profile, re
       },
       weekPlan,
       shoppingSuggestions: ['Nếu thiếu đạm: thêm trứng/ức gà/cá', 'Bổ sung rau lá xanh cho 7 ngày', 'Thêm trái cây ít đường cho bữa phụ'],
-      notes: [reason || 'Fallback local được dùng do lỗi tạm thời từ AI provider.'],
+      notes: [getFriendlyAiErrorMessage(reason)],
     },
     profile,
     bmi,
