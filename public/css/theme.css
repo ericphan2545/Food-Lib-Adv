@@ -130,15 +130,18 @@
 .modal-overlay {
     display: none; /* Ẩn mặc định */
     position: fixed;
-    z-index: 1000;
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
-    height: 110%;
+    height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.6); /* Màu nền đen mờ */
     backdrop-filter: blur(5px); /* Hiệu ứng mờ background */
     animation: fadeIn 0.3s;
+    /* Căn giữa modal theo cả 2 chiều */
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
