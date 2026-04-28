@@ -1,0 +1,30 @@
+<header class="header">
+  <div class="header-content">
+    <a href="/" class="logo" style="text-decoration: none; color: inherit;">
+      <div class="logo-icon">🍳</div>
+      <h1>Food<span>Library</span></h1>
+    </a>
+    <nav class="nav">
+      <ul>
+        <li><a href="/">Trang Chủ</a></li>
+        <li><a href="/meal-planner">Lập Thực Đơn</a></li>
+        <li><a href="/favorites">Yêu Thích</a></li>
+        <% if (currentUser) { %>
+          <li>
+            <form action="/users/logout" method="POST" style="margin: 0;">
+              <button
+                type="submit"
+                style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;"
+              >
+                Đăng xuất
+              </button>
+            </form>
+          </li>
+        <% } else { %>
+          <li><a href="/users/login">Đăng nhập</a></li>
+          <li><a href="/users/register">Đăng ký</a></li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+</header>

@@ -26,12 +26,7 @@ exports.loginForm = (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ 
-        $or: [
-    { email: username },
-    { username: username }
-  ]
-    });
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).render('users/login', {
         title: 'Đăng nhập',
@@ -61,6 +56,10 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => res.redirect('/users/login'));
+  req.session.destroy((err) => {
+    if (err) return res.status(500).send('Không thể đăng xuất');
+    res.clearCookie('connect.sid');
+    return res.redirect('/users/login');
+  });
 };
 

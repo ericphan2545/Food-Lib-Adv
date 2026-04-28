@@ -21,23 +21,7 @@
   <body>
     <div class="bg-pattern"></div>
 
-    <header class="header">
-      <div class="header-content">
-        <a href="/" class="logo" style="text-decoration: none; color: inherit;">
-          <div class="logo-icon">🍳</div>
-          <h1>Food<span>Library</span></h1>
-        </a>
-
-        <nav class="nav">
-          <ul>
-            <li><a href="/">Trang Chủ</a></li>
-            <li><a href="/meal-planner">Lập Thực Đơn</a></li>
-            <li><a href="/favorites">Yêu Thích</a></li>
-            <li><a href="/users/logout">Đăng xuất</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <%- include('../partials/header') %>
 
     <div class="main-container">
       <main class="content-area">
@@ -125,7 +109,7 @@
           <div class="weekly-calendar">
             <div class="calendar-header">
               <h3 class="calendar-title">Lịch ăn trong tuần</h3>
-              <button class="auto-generate-btn" onclick="autoGenerateMeals()">Tự động đề xuất</button>
+              <button class="auto-generate-btn" onclick="autoGenerateMeals()">AI tối ưu thực đơn</button>
             </div>
             <div class="days-grid" id="daysGrid"></div>
           </div>
@@ -134,13 +118,17 @@
     </div>
 
     <div class="modal-overlay" id="settingsModal" style="display: none;">
-      <div class="modal">
+      <div class="modal settings-modal">
         <div class="modal-header">
           <h3 class="modal-title">📊 Thông tin cơ thể & BMI</h3>
           <button class="modal-close" onclick="closeSettingsModal()">✕</button>
         </div>
         <div class="modal-body">
           <div class="bmi-form-section">
+            <p class="bmi-form-helper">
+              Cập nhật thông tin cơ thể để AI tối ưu năng lượng và thực đơn chính xác hơn.
+            </p>
+
             <div class="form-group">
               <label class="form-label">Giới tính</label>
               <div class="gender-options">
@@ -155,27 +143,29 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Tuổi</label>
-              <div class="input-wrapper">
-                <input type="number" class="input-field" id="age" placeholder="25" min="10" max="100" />
-                <span class="input-unit">tuổi</span>
+            <div class="bmi-grid-2">
+              <div class="form-group">
+                <label class="form-label">Tuổi</label>
+                <div class="input-wrapper">
+                  <input type="number" class="input-field" id="age" placeholder="25" min="10" max="100" />
+                  <span class="input-unit">tuổi</span>
+                </div>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Chiều cao</label>
-              <div class="input-wrapper">
-                <input type="number" class="input-field" id="height" placeholder="170" min="100" max="250" />
-                <span class="input-unit">cm</span>
+              <div class="form-group">
+                <label class="form-label">Chiều cao</label>
+                <div class="input-wrapper">
+                  <input type="number" class="input-field" id="height" placeholder="170" min="100" max="250" />
+                  <span class="input-unit">cm</span>
+                </div>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Cân nặng</label>
-              <div class="input-wrapper">
-                <input type="number" class="input-field" id="weight" placeholder="65" min="30" max="300" />
-                <span class="input-unit">kg</span>
+              <div class="form-group">
+                <label class="form-label">Cân nặng</label>
+                <div class="input-wrapper">
+                  <input type="number" class="input-field" id="weight" placeholder="65" min="30" max="300" />
+                  <span class="input-unit">kg</span>
+                </div>
               </div>
             </div>
 
@@ -201,9 +191,35 @@
               </div>
             </div>
 
-            <button class="calculate-btn" onclick="calculateBMI()">
-              <span>✨</span> Tính toán & Lưu
-            </button>
+            <div class="form-group">
+              <label class="form-label">Số bữa mục tiêu mỗi ngày</label>
+              <div class="input-wrapper">
+                <select class="input-field" id="mealsPerDay">
+                  <option value="3">3 bữa (Sáng - Trưa - Tối)</option>
+                  <option value="4">4 bữa (thêm bữa phụ)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Chế độ ăn (tuỳ chọn)</label>
+              <div class="input-wrapper">
+                <input type="text" class="input-field" id="dietaryPreferences" placeholder="Ví dụ: ăn chay, low-carb, không lactose" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dị ứng/không ăn (tuỳ chọn)</label>
+              <div class="input-wrapper">
+                <input type="text" class="input-field" id="allergyNotes" placeholder="Ví dụ: dị ứng tôm, không ăn cay" />
+              </div>
+            </div>
+
+            <div class="bmi-action-bar">
+              <button class="calculate-btn" onclick="calculateBMI()">
+                <span>✨</span> Tính toán & Lưu
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -232,6 +248,33 @@
     <button class="theme-toggle" aria-label="Toggle theme">
       <span class="icon-light">🌙</span>
       <span class="icon-dark">☀️</span>
+    </button>
+
+    <button
+      type="button"
+      onclick="openAiModal()"
+      aria-label="Mở AI tư vấn"
+      title="Mở AI tư vấn"
+      style="
+        position: fixed;
+        right: 18px;
+        bottom: 86px;
+        width: 52px;
+        height: 52px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+        cursor: pointer;
+        z-index: 2500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+      "
+    >
+      🤖
     </button>
 
     <div id="recipe-modal" class="modal-overlay" style="display: none; z-index: 2000;">
@@ -267,6 +310,88 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="aiConfirmModal" style="display: none; z-index: 3600;">
+      <div class="modal modal-warning" style="max-width: 460px;">
+        <div class="modal-header warning-header">
+          <div class="warning-icon">🗑️</div>
+        </div>
+        <div class="modal-body warning-body">
+          <h3 class="modal-title warning-title">Xác nhận xóa lịch sử</h3>
+          <p class="warning-text" id="aiConfirmMessage">
+            Bạn có chắc muốn xóa toàn bộ lịch sử gợi ý AI?
+          </p>
+          <div class="modal-actions warning-actions">
+            <button class="btn-cancel" type="button" onclick="cancelAiHistoryDelete()">Hủy</button>
+            <button class="btn-confirm" type="button" onclick="confirmAiHistoryDelete()">
+              <span>🗑️</span> Xóa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="aiModal" style="display: none;">
+      <div class="modal ai-meal-modal" style="max-width: 960px; width: 92%; margin: 2rem auto;">
+        <div class="modal-header">
+          <h3 class="modal-title">🤖 AI Planner theo nguyên liệu tuần & BMI</h3>
+          <button class="modal-close" onclick="closeAiModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="ai-modal-grid">
+            <section class="ai-modal-card">
+              <h4 class="ai-step-title">1) Nguyên liệu bạn có trong tuần</h4>
+              <p class="ai-step-note">
+                Gõ tự nhiên theo dòng hoặc phân tách bằng dấu phẩy. Ví dụ: "2kg ức gà, 10 trứng, 1 bó cải xanh, 500g cá hồi".
+              </p>
+              <textarea
+                class="input-field ai-ingredients-textarea"
+                id="aiIngredientsInput"
+                placeholder="Nhập nguyên liệu có sẵn cho cả tuần..."
+              ></textarea>
+            </section>
+            <section class="ai-modal-card">
+              <h4 class="ai-step-title">2) Hồ sơ BMI đã tối ưu</h4>
+              <p class="ai-step-note">
+                AI sẽ dùng hồ sơ cơ thể hiện tại để tối ưu năng lượng và macro. Nếu chưa có dữ liệu, hãy bấm "Cập nhật BMI".
+              </p>
+              <div id="aiProfileSummary" class="ai-profile-summary"></div>
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label class="form-label">Ghi chú thêm (tuỳ chọn)</label>
+                <input class="input-field" id="aiNoteInput" placeholder="Ví dụ: không ăn cay, dị ứng tôm..." />
+              </div>
+              <button class="auto-generate-btn" style="width:100%;" onclick="requestAiAdvice()">Tạo thực đơn AI 7 ngày</button>
+              <div id="aiAdviceStatus" style="margin-top: 10px; color: var(--text-muted); font-size: 0.95rem;"></div>
+            </section>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <h4 style="margin: 0 0 8px;">3) Kết quả tư vấn AI</h4>
+            <div id="aiAdviceResult" style="border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px; min-height: 120px; background: rgba(255,255,255,0.6);"></div>
+            <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+              <button id="applyAiPlanBtn" class="auto-generate-btn" style="display:none;" onclick="applyAiPlanToCurrentWeek()">
+                Áp dụng vào lịch tuần hiện tại
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="margin: 0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <h4 style="margin: 0;">4) Lịch sử gợi ý AI</h4>
+              <button
+                type="button"
+                onclick="clearAiHistory()"
+                style="border:none; border-radius:8px; background:#ef5350; color:#fff; padding:6px 10px; font-size:0.85rem; cursor:pointer;"
+                title="Xóa toàn bộ lịch sử gợi ý AI"
+              >
+                Xóa lịch sử
+              </button>
+            </div>
+            <div id="aiHistoryList" class="ai-history-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="toast" class="toast">
       <div class="toast-icon">✅</div>
       <div class="toast-body">
@@ -275,10 +400,13 @@
       </div>
     </div>
 
+    <script>
+      window.CURRENT_USER = <%- JSON.stringify(currentUser || null) %>;
+    </script>
     <script src="/public/js/nav-indicator.js"></script>
     <script src="/public/js/theme.js"></script>
     <script src="/public/js/food-database.js"></script>
-    <script src="/public/js/recipes.js"></script>
+    <script src="/public/js/recipes-ui.js"></script>
     <script src="/public/js/meal-planner.js"></script>
   </body>
 </html>
