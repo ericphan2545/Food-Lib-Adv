@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/public/css/base.css">
+    <link rel="stylesheet" href="/public/css/layout.css">
+    <link rel="stylesheet" href="/public/css/components.css">
+    <link rel="stylesheet" href="/public/css/theme.css">
+</head>
+<body class="bg-pattern">
+    <%- include('../partials/header') %>
+
+    <section class="section container" style="margin-top: 2rem;">
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" placeholder="Tìm kiếm món ăn theo tên...">
+                </div>
+                <button class="btn btn-primary btn-rounded">Tìm Kiếm</button>
+            </div>
+            <div class="filters">
+                <span class="filter-label">🏷️ Lọc theo:</span>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-category="all">Tất cả</button>
+                    <button class="filter-btn" data-category="carbs">Tinh bột</button>
+                    <button class="filter-btn" data-category="protein">Đạm</button>
+                    <button class="filter-btn" data-category="fat">Chất béo</button>
+                    <button class="filter-btn" data-category="fiber">Chất xơ</button>
+                    <button class="filter-btn" data-category="balanced">Cân bằng</button>
+                </div>
+                <select class="filter-select" id="filter-difficulty">
+                    <option value="all">Độ khó (Tất cả)</option>
+                    <option value="Dễ">Dễ</option>
+                    <option value="Trung bình">Trung bình</option>
+                    <option value="Khó">Khó</option>
+                </select>
+                <select class="filter-select" id="filter-time">
+                    <option value="all">Thời gian (Tất cả)</option>
+                    <option value="under_30">Dưới 30 phút</option>
+                    <option value="30_60">30 - 60 phút</option>
+                    <option value="over_60">Trên 60 phút</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="section-header">
+            <h2 class="section-title">Khám Phá Món Ăn</h2>
+            <span class="result-count"></span>
+        </div>
+        <div class="grid grid-4" id="food-grid"></div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <button class="theme-toggle" aria-label="Toggle theme">
+        <span class="icon-light">🌙</span>
+        <span class="icon-dark">☀️</span>
+    </button>
+
+    <div id="recipe-modal" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal" style="max-width: 800px; width: 90%; margin: 2rem auto; max-height: 90vh; display: flex; flex-direction: column; background: var(--white); border-radius: 16px; position: relative;">
+            <div class="modal-header">
+                <h3 class="modal-title">Chi tiết công thức</h3>
+                <div class="modal-header-actions">
+                    <div class="food-favorite favorite-btn recipe-modal-fav"><span>❤️</span></div>
+                    <button type="button" class="modal-close" onclick="closeRecipeModal()" aria-label="Đóng">✕</button>
+                </div>
+            </div>
+            <div class="modal-body" id="modal-body-content" style="padding: 1.5rem; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+      window.CURRENT_USER = <%- JSON.stringify(currentUser || null) %>;
+    </script>
+    <script src="/public/js/nav-indicator.js"></script>
+    <script src="/public/js/theme.js"></script>
+    <script src="/public/js/food-database.js"></script>
+    <script src="/public/js/recipes-ui.js"></script>
+</body>
+</html>
+
