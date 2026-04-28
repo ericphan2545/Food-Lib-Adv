@@ -16,8 +16,12 @@
   "main": "backend/app.js",
   "scripts": {
     "start": "node backend/app.js",
+<<<<<<< HEAD
     "dev": "nodemon backend/app.js",
     "gemini:list-models": "node scripts/list-gemini-models.js"
+=======
+    "dev": "nodemon backend/app.js"
+>>>>>>> 8993b3be326816dc805dfe669cbae2a48d1130c2
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
