@@ -1105,8 +1105,7 @@ h1, h2, h3 {
 
 [data-theme="dark"] .day-column,
 [data-theme="dark"] .food-item,
-[data-theme="dark"] .filter-tab,
-[data-theme="dark"] .bmi-result-card {
+[data-theme="dark"] .filter-tab {
     background: #16213e;
 }
 
@@ -1117,6 +1116,35 @@ h1, h2, h3 {
 
 [data-theme="dark"] .nutrient-badge {
     background: #16213e;
+}
+
+/* ===== DARK MODE: BMI RESULT CARD ===== */
+[data-theme="dark"] .bmi-result-card {
+    background-color: #16213e;
+    border-color: #2d4a3e;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .bmi-overview {
+    border-right-color: #2d4a3e;
+}
+
+[data-theme="dark"] .bmi-card-title {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .bmi-circle {
+    background: linear-gradient(135deg, #43a047, #66bb6a);
+    box-shadow: 0 10px 25px rgba(67, 160, 71, 0.2);
+}
+
+[data-theme="dark"] .stat-item {
+    background-color: rgba(76, 175, 80, 0.08);
+    border: 1px solid rgba(76, 175, 80, 0.15);
+}
+
+[data-theme="dark"] .stat-item:hover {
+    background-color: rgba(76, 175, 80, 0.12);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -1284,11 +1312,6 @@ h1, h2, h3 {
     transform: translateX(5px);
 }
 
-/* Dark Mode cho các box con */
-[data-theme="dark"] .stat-item {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
 .stat-icon {
     font-size: 1.8rem;
     width: 50px;
@@ -1315,10 +1338,18 @@ h1, h2, h3 {
     margin-bottom: 0.2rem;
 }
 
+[data-theme="dark"] .stat-label {
+    color: #b0b0b0;
+}
+
 .stat-value {
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--color-black);
+}
+
+[data-theme="dark"] .stat-value {
+    color: #eaeaea;
 }
 
 .stat-unit {
@@ -1326,6 +1357,10 @@ h1, h2, h3 {
     color: var(--text-secondary);
     margin-left: 4px;
     font-weight: 400;
+}
+
+[data-theme="dark"] .stat-unit {
+    color: #b0b0b0;
 }
 
 /* --- HIGHLIGHT ITEM (Mục tiêu Calo) --- */
@@ -1461,6 +1496,11 @@ h1, h2, h3 {
 
 .planner-layout .stat-icon {
     display: none; /* Ẩn icon lửa/sấm sét cho gọn */
+}
+
+[data-theme="dark"] .planner-layout .stat-item {
+    background-color: rgba(76, 175, 80, 0.08);
+    border: 1px solid rgba(76, 175, 80, 0.15);
 }
 
 /* 4. Tinh chỉnh Lịch (Compact) */
