@@ -2,6 +2,19 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Food = require('../models/Food');
 const User = require('../models/User');
 
+function makeReqId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function logAi(reqId, message, extra) {
+  try {
+    const suffix = extra ? ` ${JSON.stringify(extra)}` : '';
+    console.log(`[AI][${reqId}] ${message}${suffix}`);
+  } catch {
+    console.log(`[AI][${reqId}] ${message}`);
+  }
+}
+
 function normalizeIngredients(raw) {
   if (!raw) return [];
   if (Array.isArray(raw)) {
@@ -414,12 +427,18 @@ async function requestGeminiWithRetry(genAI, prompt) {
   for (const modelName of models) {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       try {
+        // Log nhẹ để debug (không log prompt/API key)
+        console.log(`[AI] trying model=${modelName} attempt=${attempt}`);
         const model = genAI.getGenerativeModel({ model: modelName });
         const result = await model.generateContent(prompt);
+        console.log(`[AI] success model=${modelName}`);
         return result?.response?.text?.() || '';
       } catch (err) {
         lastError = err;
         const status = Number(err?.status) || 0;
+        console.warn(
+          `[AI] error model=${modelName} attempt=${attempt} status=${status} message=${String(err?.message || err).slice(0, 180)}`,
+        );
         const retriable = [429, 500, 502, 503, 504].includes(status);
         if (!retriable) throw err;
         if (attempt < 2) {
@@ -433,6 +452,7 @@ async function requestGeminiWithRetry(genAI, prompt) {
 }
 
 exports.getAdvice = async (req, res) => {
+  const reqId = makeReqId();
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     const profile = req.body?.profile || {};
@@ -446,20 +466,32 @@ exports.getAdvice = async (req, res) => {
     const dietaryPreferences = String(profile?.dietaryPreferences || '').trim().slice(0, 300);
     const mealsPerDay = Math.max(3, Math.min(4, Number(profile?.mealsPerDay || 3)));
 
+    logAi(reqId, 'request received', {
+      bmi,
+      targetCalories,
+      ingredientsCount: ingredients.length,
+      mealsPerDay,
+      hasApiKey: Boolean(apiKey && !String(apiKey).includes('your_gemini_api_key_here')),
+    });
+
     if (!bmi || bmi < 10 || bmi > 60) {
+      logAi(reqId, 'reject invalid BMI', { bmi });
       return res.status(400).json({ error: 'BMI không hợp lệ (10 - 60)' });
     }
     if (ingredients.length === 0) {
+      logAi(reqId, 'reject empty ingredients');
       return res.status(400).json({ error: 'Bạn cần chọn/nhập ít nhất 1 nguyên liệu' });
     }
 
     const foods = await Food.find({}, { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 }).sort({ id: 1 }).lean();
     if (!foods.length) {
+      logAi(reqId, 'no foods in database');
       return res.status(500).json({ error: 'Chưa có dữ liệu món ăn trong database' });
     }
     const foodIndex = buildFoodIndex(foods);
 
     if (!apiKey || apiKey.includes('your_gemini_api_key_here')) {
+      logAi(reqId, 'fallback: missing GEMINI_API_KEY');
       const fallback = createLocalFallbackPlan({
         bmi,
         targetCalories,
@@ -484,6 +516,7 @@ exports.getAdvice = async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
+    logAi(reqId, 'calling provider', { provider: 'gemini', modelCandidates: ['gemini-2.5-flash', 'gemini-2.0-flash'] });
     const prompt = `
 Bạn là trợ lý dinh dưỡng cho ứng dụng lập thực đơn.
 
@@ -553,6 +586,7 @@ ${foodBrief}
     try {
       parsed = JSON.parse(jsonSlice);
     } catch (e) {
+      logAi(reqId, 'fallback: invalid JSON from provider', { sample: String(text || '').slice(0, 140) });
       const fallback = createLocalFallbackPlan({
         bmi,
         targetCalories,
@@ -577,6 +611,7 @@ ${foodBrief}
       buildIngredientKeywords(ingredients),
     );
     if (ingredientFit.totalMeals > 0 && ingredientFit.coverage < 0.2) {
+      logAi(reqId, 'fallback: low ingredient fit', ingredientFit);
       const fallback = createLocalFallbackPlan({
         bmi,
         targetCalories,
@@ -601,6 +636,10 @@ ${foodBrief}
       note: String(req.body?.note || '').slice(0, 400),
       result: normalized,
     });
+    logAi(reqId, 'success: returning normalized plan', {
+      source: normalized.source,
+      ingredientFit,
+    });
     return res.json(normalized);
   } catch (err) {
     console.error('[AI] advice error:', err);
@@ -609,6 +648,7 @@ ${foodBrief}
       err?.message ||
       err?.statusText ||
       'Lỗi AI server';
+    logAi(reqId, 'fallback: exception caught', { status, message: String(msg).slice(0, 180) });
     let fallbackFoodIndex = buildFoodIndex([]);
     try {
       const foods = await Food.find({}, { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 }).sort({ id: 1 }).lean();
