@@ -129,6 +129,7 @@ const MealPlanner = {
   currentSelectedSlot: null,
   aiLastWeekPlan: null,
   aiHistory: [],
+  pendingConfirmResolver: null,
 
   // ===== CONSTANTS =====
   days: [
@@ -206,6 +207,13 @@ const MealPlanner = {
         if (e.target === aiModal) this.closeAiModal();
       });
     }
+
+    const aiConfirmModal = document.getElementById("aiConfirmModal");
+    if (aiConfirmModal) {
+      aiConfirmModal.addEventListener("click", (e) => {
+        if (e.target === aiConfirmModal) this.closeConfirmDialog(false);
+      });
+    }
   },
 
   // ===== AI MODAL (Nguyên liệu tuần + BMI profile) =====
@@ -244,6 +252,32 @@ const MealPlanner = {
     if (modal) {
       modal.classList.remove("show");
       setTimeout(() => (modal.style.display = "none"), 300);
+    }
+  },
+
+  openConfirmDialog(message) {
+    const modal = document.getElementById("aiConfirmModal");
+    const messageEl = document.getElementById("aiConfirmMessage");
+    if (!modal || !messageEl) return Promise.resolve(false);
+
+    messageEl.textContent = String(message || "Bạn có chắc muốn thực hiện thao tác này?");
+    modal.style.display = "flex";
+    setTimeout(() => modal.classList.add("show"), 10);
+
+    return new Promise((resolve) => {
+      this.pendingConfirmResolver = resolve;
+    });
+  },
+
+  closeConfirmDialog(confirmed = false) {
+    const modal = document.getElementById("aiConfirmModal");
+    if (modal) {
+      modal.classList.remove("show");
+      setTimeout(() => (modal.style.display = "none"), 200);
+    }
+    if (typeof this.pendingConfirmResolver === "function") {
+      this.pendingConfirmResolver(Boolean(confirmed));
+      this.pendingConfirmResolver = null;
     }
   },
 
@@ -338,7 +372,12 @@ const MealPlanner = {
       }
 
       this.aiLastWeekPlan = data?.weekPlan || null;
-      if (status) status.textContent = "Đã nhận thực đơn AI.";
+      if (status) {
+        status.textContent =
+          data?.source === "fallback-local"
+            ? "AI đang giới hạn, đã dùng rule BMI dự phòng để tạo thực đơn."
+            : "Đã nhận thực đơn AI.";
+      }
       if (out) out.innerHTML = this.renderAiAdvice(data);
       if (applyBtn && this.aiLastWeekPlan) applyBtn.style.display = "inline-flex";
       await this.loadAiHistory();
@@ -366,6 +405,32 @@ const MealPlanner = {
       this.aiHistory = [];
     }
     this.renderAiHistoryList();
+  },
+
+  async clearAiHistory() {
+    if (!this.isLoggedIn) {
+      this.showToast("Bạn cần đăng nhập để xóa lịch sử AI.");
+      return;
+    }
+    const confirmed = await this.openConfirmDialog("Bạn có chắc muốn xóa toàn bộ lịch sử gợi ý AI?");
+    if (!confirmed) return;
+
+    const status = document.getElementById("aiAdviceStatus");
+    try {
+      if (status) status.textContent = "Đang xóa lịch sử gợi ý AI...";
+      const res = await fetch("/api/ai/history", { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || "Không thể xóa lịch sử AI.");
+      }
+      this.aiHistory = [];
+      this.renderAiHistoryList();
+      if (status) status.textContent = "Đã xóa lịch sử gợi ý AI.";
+      this.showToast("Đã xóa lịch sử AI.");
+    } catch (err) {
+      console.error("clearAiHistory error:", err);
+      if (status) status.textContent = err?.message || "Xóa lịch sử thất bại.";
+    }
   },
 
   renderAiHistoryList() {
@@ -1291,6 +1356,9 @@ window.closeAiModal = () => MealPlanner.closeAiModal();
 window.requestAiAdvice = () => MealPlanner.requestAiAdvice();
 window.applyAiPlanToCurrentWeek = () => MealPlanner.applyAiPlanToCurrentWeek();
 window.openAiHistoryItem = (index) => MealPlanner.openAiHistoryItem(index);
+window.clearAiHistory = () => MealPlanner.clearAiHistory();
+window.confirmAiHistoryDelete = () => MealPlanner.closeConfirmDialog(true);
+window.cancelAiHistoryDelete = () => MealPlanner.closeConfirmDialog(false);
 
 document.addEventListener("DOMContentLoaded", () => {
   MealPlanner.init();

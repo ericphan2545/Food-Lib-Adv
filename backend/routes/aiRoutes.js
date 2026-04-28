@@ -7,6 +7,7 @@ const router = express.Router();
 // Tư vấn AI theo nguyên liệu + BMI (yêu cầu login để tránh lạm dụng API key)
 router.post('/advice', requireLogin, aiMealAdviceController.getAdvice);
 router.get('/history', requireLogin, aiMealAdviceController.getHistory);
+router.delete('/history', requireLogin, aiMealAdviceController.clearHistory);
 
 module.exports = router;
 

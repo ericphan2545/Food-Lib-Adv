@@ -41,6 +41,172 @@ function classifyBMIText(bmi) {
   return 'Béo phì';
 }
 
+function normalizeTextForMatch(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+const INGREDIENT_STOPWORDS = new Set([
+  'kg',
+  'g',
+  'gram',
+  'grams',
+  'ml',
+  'l',
+  'lit',
+  'qua',
+  'trai',
+  'bat',
+  'to',
+  'hop',
+  'goi',
+  'muong',
+  'thia',
+  'it',
+  'nhieu',
+  'mot',
+  'hai',
+  'ba',
+  'bon',
+  'nam',
+  'co',
+  'va',
+  'voi',
+  'tuoi',
+  'song',
+  'chin',
+  'ngot',
+  'man',
+]);
+
+function sanitizeIngredientToken(token) {
+  return String(token || '')
+    .replace(/[0-9]/g, '')
+    .replace(/[^\p{L}\s]/gu, ' ')
+    .trim();
+}
+
+function buildIngredientKeywords(ingredients = []) {
+  const keywords = new Set();
+  ingredients.forEach((item) => {
+    const text = normalizeTextForMatch(sanitizeIngredientToken(item)).trim();
+    if (!text) return;
+    if (!INGREDIENT_STOPWORDS.has(text) && text.length >= 2) keywords.add(text);
+    text
+      .split(/\s+/g)
+      .map((x) => x.trim().replace(/[0-9]/g, ''))
+      .filter((x) => x.length >= 2 && !INGREDIENT_STOPWORDS.has(x))
+      .forEach((word) => keywords.add(word));
+  });
+  return Array.from(keywords).slice(0, 120);
+}
+
+function getBmiFallbackStrategy(bmi, targetCalories) {
+  const b = Number(bmi);
+  const category = classifyBMIText(b);
+  const hasTarget = Number.isFinite(Number(targetCalories)) && Number(targetCalories) > 0;
+  const kcal = hasTarget
+    ? Number(targetCalories)
+    : b < 18.5
+      ? 2300
+      : b < 23
+        ? 2000
+        : b < 25
+          ? 1800
+          : b < 30
+            ? 1650
+            : 1500;
+
+  let mealRatios = { breakfast: 0.3, lunch: 0.4, dinner: 0.3 };
+  let categoryWeights = { protein: 1.1, fiber: 0.8, balanced: 1, carbs: 1, fat: 0.7 };
+  if (category === 'Thiếu cân') {
+    mealRatios = { breakfast: 0.3, lunch: 0.4, dinner: 0.3 };
+    categoryWeights = { protein: 1.15, fiber: 0.8, balanced: 1.1, carbs: 1.05, fat: 0.9 };
+  } else if (category === 'Bình thường') {
+    mealRatios = { breakfast: 0.28, lunch: 0.37, dinner: 0.35 };
+    categoryWeights = { protein: 1.1, fiber: 1, balanced: 1.1, carbs: 0.95, fat: 0.85 };
+  } else if (category === 'Thừa cân nhẹ') {
+    mealRatios = { breakfast: 0.27, lunch: 0.38, dinner: 0.35 };
+    categoryWeights = { protein: 1.2, fiber: 1.2, balanced: 1.05, carbs: 0.8, fat: 0.7 };
+  } else if (category === 'Thừa cân' || category === 'Béo phì') {
+    mealRatios = { breakfast: 0.28, lunch: 0.4, dinner: 0.32 };
+    categoryWeights = { protein: 1.25, fiber: 1.25, balanced: 1.05, carbs: 0.75, fat: 0.6 };
+  }
+
+  return {
+    category,
+    targetCalories: kcal,
+    mealTargets: {
+      breakfast: Math.round(kcal * mealRatios.breakfast),
+      lunch: Math.round(kcal * mealRatios.lunch),
+      dinner: Math.round(kcal * mealRatios.dinner),
+    },
+    categoryWeights,
+  };
+}
+
+function scoreIngredientMatch(food, ingredientKeywords) {
+  if (!food || !ingredientKeywords?.length) return { score: 0, matches: [] };
+  const haystack = normalizeTextForMatch([food.name, ...(food.ingredients || [])].join(' '));
+  const matches = [];
+  let score = 0;
+  ingredientKeywords.forEach((kw) => {
+    if (kw.length < 2 || INGREDIENT_STOPWORDS.has(kw)) return;
+    if (haystack.includes(kw)) {
+      matches.push(kw);
+      score += kw.length >= 5 ? 2 : 1;
+    }
+  });
+  return { score: Math.min(score, 10), matches: matches.slice(0, 3) };
+}
+
+function pickRuleBasedFood(pool, options) {
+  const { targetMealCalories, ingredientKeywords, strategy, used } = options;
+  if (!Array.isArray(pool) || !pool.length) return null;
+
+  const ranked = pool
+    .map((food) => {
+      const calories = Number(food?.calories) || 0;
+      const macroBalance = strategy.categoryWeights[food?.category] || 1;
+      const diffRatio = targetMealCalories > 0 ? Math.abs(calories - targetMealCalories) / targetMealCalories : 0;
+      const calorieScore = Math.max(0, 1.2 - diffRatio); // 0..1.2
+      const ingredientMatch = scoreIngredientMatch(food, ingredientKeywords);
+      const usedCount = used.get(food.id) || 0;
+      const totalScore =
+        calorieScore * 50 +
+        macroBalance * 24 +
+        ingredientMatch.score * 9 -
+        usedCount * 12 -
+        (calories > targetMealCalories * 1.6 ? 20 : 0);
+      return { food, totalScore, ingredientMatch };
+    })
+    .sort((a, b) => b.totalScore - a.totalScore || a.food.id - b.food.id);
+
+  return ranked[0];
+}
+
+function evaluateWeekPlanIngredientFit(weekPlan, foodIndex, ingredientKeywords) {
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const meals = ['breakfast', 'lunch', 'dinner'];
+  let totalMeals = 0;
+  let matchedMeals = 0;
+  days.forEach((day) => {
+    meals.forEach((meal) => {
+      const foodId = Number(weekPlan?.[day]?.[meal]?.foodId);
+      if (!Number.isFinite(foodId)) return;
+      totalMeals += 1;
+      const food = foodIndex.byId.get(foodId);
+      if (!food) return;
+      const match = scoreIngredientMatch(food, ingredientKeywords);
+      if (match.score > 0) matchedMeals += 1;
+    });
+  });
+  const coverage = totalMeals > 0 ? matchedMeals / totalMeals : 0;
+  return { coverage, matchedMeals, totalMeals };
+}
+
 function buildFoodIndex(foods = []) {
   const byId = new Map();
   const byMeal = { breakfast: [], lunch: [], dinner: [] };
@@ -128,7 +294,7 @@ async function saveAiHistory(userId, payload) {
           },
         },
       },
-      { new: false },
+      { returnDocument: 'before' },
     );
   } catch (err) {
     console.warn('[AI] không lưu được history:', err?.message || err);
@@ -152,41 +318,85 @@ function normalizeAiResponse(parsed, profile, bmi, targetCalories, foodIndex, so
 
 function createLocalFallbackPlan({ bmi, targetCalories, ingredients, profile, reason, foodIndex }) {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const pick = (i) => ingredients[i % Math.max(ingredients.length, 1)] || 'thực phẩm sẵn có';
-  const kcal = Number(targetCalories) > 0 ? Number(targetCalories) : 1800;
+  const strategy = getBmiFallbackStrategy(bmi, targetCalories);
+  const ingredientKeywords = buildIngredientKeywords(ingredients);
   const used = new Map();
+  const usedIngredientKeywords = new Set();
 
   const weekPlan = {};
-  days.forEach((day, idx) => {
+  days.forEach((day) => {
+    const breakfastPick = pickRuleBasedFood(foodIndex.byMeal.breakfast || [], {
+      targetMealCalories: strategy.mealTargets.breakfast,
+      ingredientKeywords,
+      strategy,
+      used,
+    });
+    const lunchPick = pickRuleBasedFood(foodIndex.byMeal.lunch || [], {
+      targetMealCalories: strategy.mealTargets.lunch,
+      ingredientKeywords,
+      strategy,
+      used,
+    });
+    const dinnerPick = pickRuleBasedFood(foodIndex.byMeal.dinner || [], {
+      targetMealCalories: strategy.mealTargets.dinner,
+      ingredientKeywords,
+      strategy,
+      used,
+    });
+
+    [breakfastPick, lunchPick, dinnerPick].forEach((pickItem) => {
+      if (pickItem?.food?.id) used.set(pickItem.food.id, (used.get(pickItem.food.id) || 0) + 1);
+      (pickItem?.ingredientMatch?.matches || []).forEach((x) => usedIngredientKeywords.add(x));
+    });
+
+    const buildReason = (pickItem, mealName) => {
+      if (!pickItem?.food?.id) return `Ưu tiên món ${mealName} có trong hệ thống cho kế hoạch dự phòng.`;
+      const matched = pickItem?.ingredientMatch?.matches || [];
+      const matchedText = matched.length ? `, tận dụng ${matched.join(', ')}` : '';
+      return `Theo BMI ${strategy.category} và mục tiêu ${strategy.mealTargets[mealName]} kcal/bữa ${mealName}${matchedText}.`;
+    };
+
     weekPlan[day] = {
       breakfast: {
-        foodId: pickFallbackFoodId(foodIndex.byMeal, 'breakfast', idx, used),
-        reason: `Ưu tiên món sáng sẵn có, kết hợp ${pick(idx)}.`,
+        foodId: breakfastPick?.food?.id || pickFallbackFoodId(foodIndex.byMeal, 'breakfast', 0, used),
+        reason: buildReason(breakfastPick, 'breakfast'),
       },
       lunch: {
-        foodId: pickFallbackFoodId(foodIndex.byMeal, 'lunch', idx + 1, used),
-        reason: `Ưu tiên món trưa cân bằng, tận dụng ${pick(idx + 1)}.`,
+        foodId: lunchPick?.food?.id || pickFallbackFoodId(foodIndex.byMeal, 'lunch', 1, used),
+        reason: buildReason(lunchPick, 'lunch'),
       },
       dinner: {
-        foodId: pickFallbackFoodId(foodIndex.byMeal, 'dinner', idx + 2, used),
-        reason: `Ưu tiên món tối dễ nấu từ nguyên liệu tuần.`,
+        foodId: dinnerPick?.food?.id || pickFallbackFoodId(foodIndex.byMeal, 'dinner', 2, used),
+        reason: buildReason(dinnerPick, 'dinner'),
       },
     };
   });
 
+  const missingIngredientCount = Math.max(0, ingredientKeywords.length - usedIngredientKeywords.size);
+  const shoppingSuggestions = [
+    missingIngredientCount > 0
+      ? `Thiếu khoảng ${missingIngredientCount} nguyên liệu khớp món, nên bổ sung thực phẩm tươi cho cả tuần.`
+      : 'Nguyên liệu hiện có đủ tốt để xoay vòng trong tuần.',
+    strategy.category === 'Thiếu cân'
+      ? 'Ưu tiên thêm tinh bột tốt và đạm nạc (gạo lứt, khoai lang, trứng, ức gà).'
+      : 'Ưu tiên thêm rau xanh, đạm nạc và giảm món chiên nhiều dầu.',
+    'Chuẩn bị 2-3 món sơ chế sẵn để giữ đúng thực đơn khi bận.',
+  ];
+
   return normalizeAiResponse(
     {
       bmiSummary: {
-        category: profile?.bmiCategory || classifyBMIText(bmi),
-        targetCalories: kcal,
+        category: profile?.bmiCategory || strategy.category,
+        targetCalories: strategy.targetCalories,
         tips: [
-          'Hệ thống AI đang quá tải nên đã dùng kế hoạch dự phòng.',
-          'Ưu tiên ăn đủ đạm và rau xanh trong từng bữa.',
-          'Điều chỉnh khẩu phần theo cảm giác no và mức vận động thực tế.',
+          'AI đang quá tải nên hệ thống dùng rule BMI dự phòng để tạo thực đơn.',
+          `Mục tiêu năng lượng ngày: khoảng ${strategy.targetCalories} kcal.`,
+          `Phân bổ bữa: sáng ${strategy.mealTargets.breakfast} - trưa ${strategy.mealTargets.lunch} - tối ${strategy.mealTargets.dinner} kcal.`,
+          'Điều chỉnh khẩu phần +/-10% theo mức vận động thực tế trong ngày.',
         ],
       },
       weekPlan,
-      shoppingSuggestions: ['Nếu thiếu đạm: thêm trứng/ức gà/cá', 'Bổ sung rau lá xanh cho 7 ngày', 'Thêm trái cây ít đường cho bữa phụ'],
+      shoppingSuggestions,
       notes: [getFriendlyAiErrorMessage(reason)],
     },
     profile,
@@ -225,10 +435,6 @@ async function requestGeminiWithRetry(genAI, prompt) {
 exports.getAdvice = async (req, res) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey.includes('your_gemini_api_key_here')) {
-      return res.status(500).json({ error: 'Thiếu GEMINI_API_KEY trong .env' });
-    }
-
     const profile = req.body?.profile || {};
     const bmi = safeNumber(profile?.bmi ?? req.body?.bmi);
     const targetCalories = safeNumber(profile?.targetCalories) || null;
@@ -252,6 +458,26 @@ exports.getAdvice = async (req, res) => {
       return res.status(500).json({ error: 'Chưa có dữ liệu món ăn trong database' });
     }
     const foodIndex = buildFoodIndex(foods);
+
+    if (!apiKey || apiKey.includes('your_gemini_api_key_here')) {
+      const fallback = createLocalFallbackPlan({
+        bmi,
+        targetCalories,
+        ingredients,
+        profile,
+        reason: 'Thiếu GEMINI_API_KEY, hệ thống chuyển sang rule BMI dự phòng.',
+        foodIndex,
+      });
+      await saveAiHistory(req.session?.user?.id, {
+        createdAt: new Date(),
+        source: fallback.source,
+        ingredientsRaw: String(req.body?.ingredientsRaw || '').slice(0, 1200),
+        note: String(req.body?.note || '').slice(0, 400),
+        result: fallback,
+      });
+      return res.json(fallback);
+    }
+
     const foodBrief = foods
       .map((f) => `${f.id}|${f.name}|meal=${f.meal}|kcal=${f.calories}|cat=${f.category}`)
       .join('\n');
@@ -345,6 +571,29 @@ ${foodBrief}
       return res.json(fallback);
     }
     const normalized = normalizeAiResponse(parsed, profile, bmi, targetCalories, foodIndex);
+    const ingredientFit = evaluateWeekPlanIngredientFit(
+      normalized.weekPlan,
+      foodIndex,
+      buildIngredientKeywords(ingredients),
+    );
+    if (ingredientFit.totalMeals > 0 && ingredientFit.coverage < 0.2) {
+      const fallback = createLocalFallbackPlan({
+        bmi,
+        targetCalories,
+        ingredients,
+        profile,
+        reason: `AI gợi ý chưa bám sát nguyên liệu (${ingredientFit.matchedMeals}/${ingredientFit.totalMeals} bữa khớp), chuyển sang rule BMI.`,
+        foodIndex,
+      });
+      await saveAiHistory(req.session?.user?.id, {
+        createdAt: new Date(),
+        source: fallback.source,
+        ingredientsRaw: String(req.body?.ingredientsRaw || '').slice(0, 1200),
+        note: String(req.body?.note || '').slice(0, 400),
+        result: fallback,
+      });
+      return res.json(fallback);
+    }
     await saveAiHistory(req.session?.user?.id, {
       createdAt: new Date(),
       source: normalized.source,
@@ -410,6 +659,21 @@ exports.getHistory = async (req, res) => {
   } catch (err) {
     console.error('[AI] getHistory error:', err);
     return res.status(500).json({ error: 'Không thể lấy lịch sử AI' });
+  }
+};
+
+exports.clearHistory = async (req, res) => {
+  try {
+    if (!req.session?.user?.id) return res.status(401).json({ error: 'Unauthorized' });
+    await User.findByIdAndUpdate(
+      req.session.user.id,
+      { $set: { aiHistory: [] } },
+      { returnDocument: 'before' },
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[AI] clearHistory error:', err);
+    return res.status(500).json({ error: 'Không thể xóa lịch sử AI' });
   }
 };
 

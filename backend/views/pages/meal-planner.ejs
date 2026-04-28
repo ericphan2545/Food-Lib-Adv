@@ -310,6 +310,26 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="aiConfirmModal" style="display: none; z-index: 3600;">
+      <div class="modal modal-warning" style="max-width: 460px;">
+        <div class="modal-header warning-header">
+          <div class="warning-icon">🗑️</div>
+        </div>
+        <div class="modal-body warning-body">
+          <h3 class="modal-title warning-title">Xác nhận xóa lịch sử</h3>
+          <p class="warning-text" id="aiConfirmMessage">
+            Bạn có chắc muốn xóa toàn bộ lịch sử gợi ý AI?
+          </p>
+          <div class="modal-actions warning-actions">
+            <button class="btn-cancel" type="button" onclick="cancelAiHistoryDelete()">Hủy</button>
+            <button class="btn-confirm" type="button" onclick="confirmAiHistoryDelete()">
+              <span>🗑️</span> Xóa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-overlay" id="aiModal" style="display: none;">
       <div class="modal ai-meal-modal" style="max-width: 960px; width: 92%; margin: 2rem auto;">
         <div class="modal-header">
@@ -355,7 +375,17 @@
           </div>
 
           <div style="margin-top: 14px;">
-            <h4 style="margin: 0 0 8px;">4) Lịch sử gợi ý AI</h4>
+            <div style="margin: 0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <h4 style="margin: 0;">4) Lịch sử gợi ý AI</h4>
+              <button
+                type="button"
+                onclick="clearAiHistory()"
+                style="border:none; border-radius:8px; background:#ef5350; color:#fff; padding:6px 10px; font-size:0.85rem; cursor:pointer;"
+                title="Xóa toàn bộ lịch sử gợi ý AI"
+              >
+                Xóa lịch sử
+              </button>
+            </div>
             <div id="aiHistoryList" class="ai-history-list"></div>
           </div>
         </div>
