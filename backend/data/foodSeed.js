@@ -4,7 +4,9 @@
  *
  * Nguồn dinh dưỡng tham khảo: Viện Dinh dưỡng Quốc gia VN + USDA FoodData.
  */
-module.exports = [
+const recipesDB = require('../../public/js/recipes.js');
+
+const baseFoods = [
   { id: 1,  name: 'Cơm gà Hội An',           emoji: '🍗', calories: 580, carbs: 65, protein: 32, fat: 18, fiber: 2, category: 'balanced', meal: 'lunch' },
   { id: 2,  name: 'Phở bò Hà Nội',           emoji: '🍜', calories: 450, carbs: 65, protein: 25, fat: 10, fiber: 2, category: 'balanced', meal: 'breakfast' },
   { id: 3,  name: 'Bún chả Hà Nội',          emoji: '🥓', calories: 520, carbs: 55, protein: 28, fat: 20, fiber: 4, category: 'protein',  meal: 'lunch' },
@@ -108,3 +110,17 @@ module.exports = [
   { id: 99, name: 'Soup lơ xào tỏi',         emoji: '🥦', calories: 140, carbs: 12, protein: 5,  fat: 8,  fiber: 5, category: 'fiber',    meal: 'dinner' },
   { id: 100,name: 'Sườn non hầm rau củ',     emoji: '🍖', calories: 420, carbs: 18, protein: 29, fat: 24, fiber: 4, category: 'balanced', meal: 'dinner' },
 ];
+
+module.exports = baseFoods.map((food) => {
+  const recipe = recipesDB[food.name] || {};
+  return {
+    ...food,
+    image: recipe.image || '',
+    recipeCategory: recipe.category || '',
+    time: recipe.time || '',
+    difficulty: recipe.difficulty || '',
+    description: recipe.description || '',
+    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+    instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
+  };
+});

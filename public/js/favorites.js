@@ -1,6 +1,6 @@
 /**
  * Favorites Page - Display user's favorite foods
- * Canonical recipe source: window.RECIPES_DB (from recipes.js)
+ * Canonical source: /api/foods
  */
 
 function getBasePath() {
@@ -20,13 +20,6 @@ const FAV_CATEGORY_LABELS = {
 const FAV_FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='240'><rect width='100%' height='100%' fill='#f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#9ca3af' font-size='20'>Food Library</text></svg>",
 );
-
-function getRecipesSource() {
-  if (typeof window !== "undefined" && window.RECIPES_DB) {
-    return window.RECIPES_DB;
-  }
-  return {};
-}
 
 const Favorites = {
   favoriteIds: [],
@@ -80,14 +73,6 @@ const Favorites = {
       typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE)
         ? FOOD_DATABASE
         : [];
-    if (this.foods.length === 0) {
-      const recipesSource = getRecipesSource();
-      this.foods = Object.keys(recipesSource).map((name, index) => ({
-        id: index + 1,
-        name,
-        category: "balanced",
-      }));
-    }
   },
 
   loadFavorites() {
@@ -128,12 +113,9 @@ const Favorites = {
     grid.style.display = "grid";
     emptyState.style.display = "none";
     resultCount.textContent = `${favoriteFoods.length} món ăn yêu thích`;
-    const recipesSource = getRecipesSource();
-
     grid.innerHTML = favoriteFoods
       .map((food) => {
-        const recipe = recipesSource[food.name] || {};
-        let imagePath = recipe.image || FAV_FALLBACK_IMG;
+        let imagePath = food.image || FAV_FALLBACK_IMG;
         if (imageMap[food.id]) {
           imagePath = imageMap[food.id];
         } else if (
@@ -148,17 +130,17 @@ const Favorites = {
             <article class="food-card">
                 <div class="image-container">
                     <img src="${imagePath}" alt="${food.name}" class="food-image">
-                    <span class="food-category-badge">${recipe.category || FAV_CATEGORY_LABELS[food.category] || "Món ngon"}</span>
+                    <span class="food-category-badge">${food.recipeCategory || FAV_CATEGORY_LABELS[food.category] || "Món ngon"}</span>
                     <div class="food-favorite favorited" data-food-id="${food.id}" style="background: #ff6b6b; cursor: pointer;">
                         <span>❤️</span>
                     </div>
                 </div>
                 <div class="food-content">
                     <h3 class="food-name">${food.name}</h3>
-                    <p class="food-description">${recipe.description || "Món ăn đang được cập nhật công thức."}</p>
+                    <p class="food-description">${food.description || "Món ăn đang được cập nhật công thức."}</p>
                     <div class="food-meta">
-                        <span class="food-time">⏱️ ${recipe.time || "Chưa cập nhật"}</span>
-                        <span class="food-difficulty">${recipe.difficulty || "N/A"}</span>
+                        <span class="food-time">⏱️ ${food.time || "Chưa cập nhật"}</span>
+                        <span class="food-difficulty">${food.difficulty || "N/A"}</span>
                     </div>
                     <button class="view-recipe-btn">Xem Công Thức</button>
                 </div>

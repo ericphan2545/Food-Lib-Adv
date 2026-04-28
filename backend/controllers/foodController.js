@@ -37,6 +37,36 @@ async function ensureSeeded() {
       console.log(`[Food] Đã bổ sung ${missing.length} món mới vào MongoDB.`);
     }
   }
+
+  // Đồng bộ fields recipe/detail từ seed vào Mongo để frontend chỉ cần đọc /api/foods.
+  const syncOps = foodSeed.map((food) => ({
+    updateOne: {
+      filter: { id: food.id },
+      update: {
+        $set: {
+          name: food.name,
+          emoji: food.emoji,
+          calories: food.calories,
+          carbs: food.carbs,
+          protein: food.protein,
+          fat: food.fat,
+          fiber: food.fiber,
+          category: food.category,
+          meal: food.meal,
+          image: food.image || '',
+          recipeCategory: food.recipeCategory || '',
+          time: food.time || '',
+          difficulty: food.difficulty || '',
+          description: food.description || '',
+          ingredients: Array.isArray(food.ingredients) ? food.ingredients : [],
+          instructions: Array.isArray(food.instructions) ? food.instructions : [],
+        },
+      },
+    },
+  }));
+  if (syncOps.length) {
+    await Food.bulkWrite(syncOps, { ordered: false });
+  }
 }
 
 async function listFoods(req, res) {

@@ -21,6 +21,13 @@ const foodSchema = new mongoose.Schema(
       enum: ['breakfast', 'lunch', 'dinner', 'any'],
       default: 'any',
     },
+    image: { type: String, default: '' },
+    recipeCategory: { type: String, default: '' },
+    time: { type: String, default: '' },
+    difficulty: { type: String, default: '' },
+    description: { type: String, default: '' },
+    ingredients: { type: [String], default: [] },
+    instructions: { type: [String], default: [] },
   },
   { timestamps: true },
 );

@@ -1,8 +1,7 @@
 // ==========================================================================
 // RECIPE MANAGER UI LOGIC
-// Uses /api/foods as canonical data source and RECIPES_DB for recipe details.
+// Uses /api/foods as canonical data source for both nutrition and recipe details.
 // ==========================================================================
-const recipeDetailsDb = (typeof window !== "undefined" && window.RECIPES_DB) ? window.RECIPES_DB : {};
 const CATEGORY_LABELS = {
     carbs: "Tinh bột",
     protein: "Đạm",
@@ -65,15 +64,8 @@ const RecipeManager = {
             return;
         }
 
-        const fallbackFoods = Object.keys(recipeDetailsDb).map((name, index) => ({
-            id: index + 1,
-            name,
-            category: "balanced",
-            calories: 0,
-            carbs: 0,
-            protein: 0,
-            fat: 0
-        }));
+        const fallbackFoods =
+            typeof FOOD_DATABASE !== "undefined" && Array.isArray(FOOD_DATABASE) ? FOOD_DATABASE : [];
         this.foods = fallbackFoods;
         this.foodById = new Map(fallbackFoods.map((food) => [food.id, food]));
         this.foodByName = new Map(fallbackFoods.map((food) => [food.name, food]));
@@ -82,9 +74,7 @@ const RecipeManager = {
     getFoodIdByName(foodName) {
         const match = this.foodByName.get(foodName);
         if (match && Number.isFinite(match.id)) return match.id;
-        const fallbackNames = Object.keys(recipeDetailsDb);
-        const fallbackIndex = fallbackNames.indexOf(foodName);
-        return fallbackIndex >= 0 ? fallbackIndex + 1 : null;
+        return null;
     },
 
     // --- KHỞI TẠO ---
@@ -160,9 +150,7 @@ const RecipeManager = {
             if (Number.isFinite(id) && id > 0) return id;
 
             const foodName = card?.querySelector?.(".food-name")?.innerText?.trim?.();
-            const foodNames = Object.keys(recipeDetailsDb);
-            const idx = foodNames.indexOf(foodName);
-            return idx >= 0 ? idx + 1 : null;
+            return null;
         };
 
         const toggleFavoriteById = (foodId, heartEl) => {
@@ -249,14 +237,13 @@ const RecipeManager = {
 
     showDetails(foodName) {
         const { modal, modalBody } = this.elements;
-        const recipe = recipeDetailsDb[foodName];
         const food = this.foodByName.get(foodName);
         const foodId = this.getFoodIdByName(foodName);
         this.currentModalFoodId = foodId;
 
         if (modal && modalBody) {
-            const ingredients = Array.isArray(recipe?.ingredients) ? recipe.ingredients : [];
-            const instructions = Array.isArray(recipe?.instructions) ? recipe.instructions : [];
+            const ingredients = Array.isArray(food?.ingredients) ? food.ingredients : [];
+            const instructions = Array.isArray(food?.instructions) ? food.instructions : [];
             const ingredientsHtml = ingredients.map((item) => `<li>${item}</li>`).join("");
             const instructionsHtml = instructions.map((step) => `<li>${step}</li>`).join("");
 
@@ -287,8 +274,8 @@ const RecipeManager = {
                 `;
             }
 
-            const imageSrc = recipe?.image || FALLBACK_IMG;
-            const contentHtml = recipe
+            const imageSrc = food?.image || FALLBACK_IMG;
+            const contentHtml = ingredients.length || instructions.length
                 ? `
                     <div class="recipe-section ingredients-box">
                         <h4 class="section-title-small">🛒 Nguyên Liệu:</h4>
@@ -445,18 +432,17 @@ const RecipeManager = {
 
         for (const food of this.foods) {
             const foodName = food.name;
-            const recipe = recipeDetailsDb[foodName] || null;
-            if (this.isMatch(food, recipe)) {
+            if (this.isMatch(food, food)) {
                 count++;
                 const foodId = food.id;
                 const isFav = favorites.includes(foodId);
                 const heartStyle = isFav ? 'style="background: #ff6b6b;"' : "";
                 const heartClass = isFav ? "favorited" : "";
-                const displayCategory = recipe?.category || CATEGORY_LABELS[food.category] || "Món ngon";
-                const displayDescription = recipe?.description || "Món ăn hấp dẫn.";
-                const displayTime = recipe?.time || "Chưa cập nhật";
-                const displayDifficulty = recipe?.difficulty || "N/A";
-                const imageSrc = recipe?.image || FALLBACK_IMG;
+                const displayCategory = food?.recipeCategory || CATEGORY_LABELS[food.category] || "Món ngon";
+                const displayDescription = food?.description || "Món ăn hấp dẫn.";
+                const displayTime = food?.time || "Chưa cập nhật";
+                const displayDifficulty = food?.difficulty || "N/A";
+                const imageSrc = food?.image || FALLBACK_IMG;
 
                 const cardHTML = `
                     <article class="food-card">

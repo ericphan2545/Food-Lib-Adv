@@ -476,3 +476,6 @@ const recipesDB = {
 if (typeof window !== "undefined") {
     window.RECIPES_DB = recipesDB;
 }
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = recipesDB;
+}
