@@ -16,6 +16,9 @@ const MealPlanner = {
     tdee: null,
     targetCalories: null,
     goal: null, // "gain" | "maintain" | "lose" | "lose-aggressive"
+    mealsPerDay: 3,
+    dietaryPreferences: "",
+    allergyNotes: "",
   },
 
   // Cờ đánh dấu user đã đăng nhập (backend sẽ inject qua window.CURRENT_USER)
@@ -83,9 +86,15 @@ const MealPlanner = {
       const ageInput = document.getElementById("age");
       const heightInput = document.getElementById("height");
       const weightInput = document.getElementById("weight");
+      const mealsPerDayInput = document.getElementById("mealsPerDay");
+      const dietaryInput = document.getElementById("dietaryPreferences");
+      const allergyInput = document.getElementById("allergyNotes");
       if (ageInput) ageInput.value = this.userData.age || "";
       if (heightInput) heightInput.value = this.userData.height || "";
       if (weightInput) weightInput.value = this.userData.weight || "";
+      if (mealsPerDayInput) mealsPerDayInput.value = this.userData.mealsPerDay || 3;
+      if (dietaryInput) dietaryInput.value = this.userData.dietaryPreferences || "";
+      if (allergyInput) allergyInput.value = this.userData.allergyNotes || "";
       if (this.userData.gender) this.selectGender(this.userData.gender);
       if (this.userData.activityLevel) this.selectActivity(this.userData.activityLevel);
       this.displayBMIResult();
@@ -118,6 +127,8 @@ const MealPlanner = {
   foodUsageCount: {},
   previousWeekFoods: [],
   currentSelectedSlot: null,
+  aiLastWeekPlan: null,
+  aiHistory: [],
 
   // ===== CONSTANTS =====
   days: [
@@ -155,6 +166,7 @@ const MealPlanner = {
     this.renderCalendar();
     this.bindEvents();
     this.checkNutritionBalance();
+    this.initAiModal();
   },
 
   initializeMealPlan() {
@@ -187,6 +199,352 @@ const MealPlanner = {
         if (e.target === settingsModal) this.closeSettingsModal();
       });
     }
+
+    const aiModal = document.getElementById("aiModal");
+    if (aiModal) {
+      aiModal.addEventListener("click", (e) => {
+        if (e.target === aiModal) this.closeAiModal();
+      });
+    }
+  },
+
+  // ===== AI MODAL (Nguyên liệu tuần + BMI profile) =====
+  initAiModal() {
+    const modal = document.getElementById("aiModal");
+    if (!modal) return;
+
+    const hasSeen = localStorage.getItem("aiModalSeen");
+    if (!hasSeen) {
+      this.openAiModal();
+      localStorage.setItem("aiModalSeen", "1");
+    }
+
+    const ingredientsInput = document.getElementById("aiIngredientsInput");
+    if (ingredientsInput) {
+      ingredientsInput.value = localStorage.getItem("aiWeeklyIngredients") || "";
+      ingredientsInput.addEventListener("input", () => {
+        localStorage.setItem("aiWeeklyIngredients", ingredientsInput.value);
+      });
+    }
+
+    this.renderAiProfileSummary();
+    this.loadAiHistory();
+  },
+
+  openAiModal() {
+    const modal = document.getElementById("aiModal");
+    if (modal) {
+      modal.style.display = "flex";
+      setTimeout(() => modal.classList.add("show"), 10);
+    }
+  },
+
+  closeAiModal() {
+    const modal = document.getElementById("aiModal");
+    if (modal) {
+      modal.classList.remove("show");
+      setTimeout(() => (modal.style.display = "none"), 300);
+    }
+  },
+
+  tokenizeIngredients(raw) {
+    return String(raw || "")
+      .split(/[\n,;|]/g)
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .slice(0, 80);
+  },
+
+  renderAiProfileSummary() {
+    const el = document.getElementById("aiProfileSummary");
+    if (!el) return;
+    if (!this.userData?.bmi) {
+      el.innerHTML = `
+        <div class="ai-profile-empty">
+          Chưa có dữ liệu BMI/TDEE. Vui lòng bấm "Cập nhật" ở thẻ BMI trước khi tạo thực đơn AI.
+        </div>
+      `;
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="ai-profile-grid">
+        <div><b>BMI</b>: ${this.userData.bmi} (${this.userData.bmiCategory || "--"})</div>
+        <div><b>TDEE</b>: ${(this.userData.tdee || 0).toLocaleString()} kcal</div>
+        <div><b>Mục tiêu</b>: ${(this.userData.targetCalories || 0).toLocaleString()} kcal/ngày</div>
+        <div><b>Macro</b>: C ${(Math.round((this.userData.targetCalories || 0) * this.getMacroRatio().carbs / 4)).toLocaleString()}g | P ${(Math.round((this.userData.targetCalories || 0) * this.getMacroRatio().protein / 4)).toLocaleString()}g | F ${(Math.round((this.userData.targetCalories || 0) * this.getMacroRatio().fat / 9)).toLocaleString()}g</div>
+      </div>
+    `;
+  },
+
+  async requestAiAdvice() {
+    const status = document.getElementById("aiAdviceStatus");
+    const out = document.getElementById("aiAdviceResult");
+    const applyBtn = document.getElementById("applyAiPlanBtn");
+    const ingredientsInput = document.getElementById("aiIngredientsInput");
+    const noteInput = document.getElementById("aiNoteInput");
+
+    const ingredientsRaw = String(ingredientsInput?.value || "");
+    const ingredients = this.tokenizeIngredients(ingredientsRaw);
+    const note = String(noteInput?.value || "").trim();
+
+    if (!this.userData?.bmi || !this.userData?.targetCalories) {
+      if (status) status.textContent = "Bạn cần cập nhật BMI/TDEE trước khi tạo thực đơn AI.";
+      return;
+    }
+    if (ingredients.length === 0) {
+      if (status) status.textContent = "Bạn cần nhập ít nhất 1 nguyên liệu cho cả tuần.";
+      return;
+    }
+
+    if (status) status.textContent = "Đang gọi AI để tối ưu thực đơn 7 ngày...";
+    if (out) out.innerHTML = "";
+    if (applyBtn) applyBtn.style.display = "none";
+
+    try {
+      const res = await fetch("/api/ai/advice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ingredientsRaw,
+          ingredients,
+          note,
+          profile: {
+            gender: this.userData.gender,
+            age: this.userData.age,
+            height: this.userData.height,
+            weight: this.userData.weight,
+            activityLevel: this.userData.activityLevel,
+            bmi: this.userData.bmi,
+            bmiCategory: this.userData.bmiCategory,
+            bmr: this.userData.bmr,
+            tdee: this.userData.tdee,
+            targetCalories: this.userData.targetCalories,
+            goal: this.userData.goal,
+            mealsPerDay: Number(this.userData.mealsPerDay || 3),
+            dietaryPreferences: this.userData.dietaryPreferences || "",
+            allergyNotes: this.userData.allergyNotes || "",
+          },
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (status) status.textContent = data?.error || "Không thể lấy tư vấn AI.";
+        if (data?.raw && out) {
+          out.innerHTML = `<pre style="white-space: pre-wrap; font-size: 0.9rem;">${String(data.raw)}</pre>`;
+        }
+        return;
+      }
+
+      this.aiLastWeekPlan = data?.weekPlan || null;
+      if (status) status.textContent = "Đã nhận thực đơn AI.";
+      if (out) out.innerHTML = this.renderAiAdvice(data);
+      if (applyBtn && this.aiLastWeekPlan) applyBtn.style.display = "inline-flex";
+      await this.loadAiHistory();
+    } catch (err) {
+      console.error("AI advice error:", err);
+      if (status) status.textContent = "Lỗi mạng khi gọi AI.";
+    }
+  },
+
+  async loadAiHistory() {
+    const listEl = document.getElementById("aiHistoryList");
+    if (!listEl) return;
+    if (!this.isLoggedIn) {
+      this.aiHistory = [];
+      this.renderAiHistoryList();
+      return;
+    }
+    try {
+      const res = await fetch("/api/ai/history");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Không tải được lịch sử AI");
+      this.aiHistory = Array.isArray(data?.history) ? data.history.slice(0, 10) : [];
+    } catch (err) {
+      console.warn("loadAiHistory error:", err);
+      this.aiHistory = [];
+    }
+    this.renderAiHistoryList();
+  },
+
+  renderAiHistoryList() {
+    const listEl = document.getElementById("aiHistoryList");
+    if (!listEl) return;
+    if (!this.isLoggedIn) {
+      listEl.innerHTML = `<div class="ai-history-empty">Đăng nhập để lưu và xem lịch sử gợi ý AI.</div>`;
+      return;
+    }
+    if (!this.aiHistory.length) {
+      listEl.innerHTML = `<div class="ai-history-empty">Chưa có lịch sử gợi ý AI.</div>`;
+      return;
+    }
+    listEl.innerHTML = this.aiHistory
+      .map((item, idx) => {
+        const created = item?.createdAt ? new Date(item.createdAt) : null;
+        const dateText = created && !Number.isNaN(created.getTime())
+          ? created.toLocaleString("vi-VN")
+          : "Không rõ thời gian";
+        const source = String(item?.source || "ai");
+        const ingredientsRaw = String(item?.ingredientsRaw || "").replace(/\s+/g, " ").trim();
+        const preview = ingredientsRaw ? ingredientsRaw.slice(0, 80) : "Không có ghi chú nguyên liệu";
+        return `
+          <button class="ai-history-item" onclick="openAiHistoryItem(${idx})" type="button">
+            <span class="ai-history-top">${dateText} · ${source}</span>
+            <span class="ai-history-preview">${preview}${ingredientsRaw.length > 80 ? "..." : ""}</span>
+          </button>
+        `;
+      })
+      .join("");
+  },
+
+  openAiHistoryItem(index) {
+    const item = this.aiHistory?.[index];
+    if (!item?.result) return;
+    const result = item.result;
+    this.aiLastWeekPlan = result?.weekPlan || null;
+    const out = document.getElementById("aiAdviceResult");
+    const status = document.getElementById("aiAdviceStatus");
+    const applyBtn = document.getElementById("applyAiPlanBtn");
+    if (out) out.innerHTML = this.renderAiAdvice(result);
+    if (status) status.textContent = "Đã mở lại một gợi ý từ lịch sử.";
+    if (applyBtn && this.aiLastWeekPlan) applyBtn.style.display = "inline-flex";
+  },
+
+  renderAiAdvice(data) {
+    const tips = Array.isArray(data?.bmiSummary?.tips) ? data.bmiSummary.tips : [];
+    const category = data?.bmiSummary?.category || "--";
+    const targetCalories = Number(data?.bmiSummary?.targetCalories || this.userData?.targetCalories || 0);
+    const weekPlan = data?.weekPlan || {};
+    const daysOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const shopping = Array.isArray(data?.shoppingSuggestions) ? data.shoppingSuggestions : [];
+    const notes = Array.isArray(data?.notes) ? data.notes : [];
+
+    const previewRows = daysOrder
+      .map((day) => {
+        const d = weekPlan?.[day];
+        if (!d) return "";
+        const breakfast = this.getFoodNameFromAiSlot(d?.breakfast);
+        const lunch = this.getFoodNameFromAiSlot(d?.lunch);
+        const dinner = this.getFoodNameFromAiSlot(d?.dinner);
+        const kcal = Number(d?.totalCalories || 0);
+        return `<tr>
+          <td style="padding:6px; border-bottom:1px solid rgba(0,0,0,0.06);">${this.dayNames[day]}</td>
+          <td style="padding:6px; border-bottom:1px solid rgba(0,0,0,0.06);">${breakfast}</td>
+          <td style="padding:6px; border-bottom:1px solid rgba(0,0,0,0.06);">${lunch}</td>
+          <td style="padding:6px; border-bottom:1px solid rgba(0,0,0,0.06);">${dinner}</td>
+          <td style="padding:6px; border-bottom:1px solid rgba(0,0,0,0.06); text-align:right;">${kcal ? kcal.toLocaleString() : "--"}</td>
+        </tr>`;
+      })
+      .join("");
+
+    return `
+      <div style="display:grid; gap: 12px;">
+        <div>
+          <div style="font-weight: 800;">BMI: ${category} | Mục tiêu: ${targetCalories.toLocaleString()} kcal/ngày</div>
+          <ul style="margin: 6px 0 0; padding-left: 18px;">
+            ${tips.map((t) => `<li>${t}</li>`).join("")}
+          </ul>
+        </div>
+        <div style="overflow:auto;">
+          <table style="width:100%; border-collapse: collapse; font-size: 0.92rem;">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding:6px;">Ngày</th>
+                <th style="text-align:left; padding:6px;">Sáng</th>
+                <th style="text-align:left; padding:6px;">Trưa</th>
+                <th style="text-align:left; padding:6px;">Tối</th>
+                <th style="text-align:right; padding:6px;">Kcal/ngày</th>
+              </tr>
+            </thead>
+            <tbody>${previewRows}</tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-weight: 700; margin-bottom: 6px;">Nguyên liệu cần mua thêm (nếu thiếu)</div>
+          <ul style="margin: 0; padding-left: 18px;">
+            ${(shopping.length ? shopping : ["Không cần mua thêm nhiều, đã ưu tiên nguyên liệu sẵn có."])
+              .map((s) => `<li>${s}</li>`)
+              .join("")}
+          </ul>
+        </div>
+        ${
+          notes.length
+            ? `<div><div style="font-weight:700; margin-bottom:6px;">Lưu ý từ AI</div><ul style="margin:0; padding-left:18px;">${notes
+                .map((n) => `<li>${n}</li>`)
+                .join("")}</ul></div>`
+            : ""
+        }
+        <div style="font-size: 0.9rem; color: var(--text-muted);">
+          Lưu ý: gợi ý mang tính tham khảo, không thay thế tư vấn y khoa.
+        </div>
+      </div>
+    `;
+  },
+
+  getFoodNameFromAiSlot(slot) {
+    const id = Number(slot?.foodId);
+    if (!Number.isFinite(id)) return "—";
+    const food = this.foodDatabase.find((f) => Number(f.id) === id);
+    return food?.name || `Món #${id}`;
+  },
+
+  pickFoodForSlotFallback(mealKey, usedIds = new Map(), dayIndex = 0) {
+    const pool = this.foodDatabase.filter((f) => !f.meal || f.meal === mealKey || f.meal === "any");
+    if (!pool.length) return null;
+    const scored = pool
+      .map((f) => ({ food: f, used: usedIds.get(f.id) || 0 }))
+      .sort((a, b) => a.used - b.used || a.food.id - b.food.id);
+    const picked = scored[dayIndex % scored.length]?.food || scored[0].food;
+    usedIds.set(picked.id, (usedIds.get(picked.id) || 0) + 1);
+    return picked;
+  },
+
+  inferCategoryFromMacros(macros = {}) {
+    const c = Number(macros?.carbs || 0);
+    const p = Number(macros?.protein || 0);
+    const f = Number(macros?.fat || 0);
+    if (p >= c && p >= f) return "protein";
+    if (c >= p && c >= f) return "carbs";
+    if (f >= c && f >= p) return "fat";
+    return "balanced";
+  },
+
+  applyAiPlanToCurrentWeek() {
+    if (!this.aiLastWeekPlan) {
+      this.showToast("Chưa có dữ liệu thực đơn AI để áp dụng.");
+      return;
+    }
+    this.initializeMealPlan();
+    const weekKey = `week${this.currentWeek}`;
+    const usedIds = new Map();
+    this.days.forEach((day, dayIndex) => {
+      const dayPlan = this.aiLastWeekPlan?.[day];
+      if (!dayPlan) {
+        this.meals.forEach((mealKey, mealIndex) => {
+          const fallbackFood = this.pickFoodForSlotFallback(mealKey, usedIds, dayIndex + mealIndex);
+          if (fallbackFood) this.mealPlan[weekKey][day][mealKey] = { ...fallbackFood, isAiGenerated: true };
+        });
+        return;
+      }
+      this.meals.forEach((mealKey) => {
+        const mealData = dayPlan?.[mealKey];
+        const foodId = Number(mealData?.foodId);
+        const matchedFood = this.foodDatabase.find((f) => Number(f.id) === foodId);
+        const fallbackFood = this.pickFoodForSlotFallback(mealKey, usedIds, dayIndex);
+        const chosen = matchedFood || fallbackFood;
+        if (!chosen) return;
+        usedIds.set(chosen.id, (usedIds.get(chosen.id) || 0) + 1);
+        this.mealPlan[weekKey][day][mealKey] = { ...chosen, isAiGenerated: true };
+      });
+    });
+
+    this.updateFoodUsageCount();
+    this.renderCalendar();
+    this.checkNutritionBalance();
+    this.saveData();
+    this.closeAiModal();
+    this.showToast("Đã áp dụng thực đơn AI vào tuần hiện tại.");
   },
 
   // ===== SETTINGS MODAL HANDLING (MỚI) =====
@@ -313,6 +671,9 @@ const MealPlanner = {
     const ageInput = document.getElementById("age");
     const heightInput = document.getElementById("height");
     const weightInput = document.getElementById("weight");
+    const mealsPerDayInput = document.getElementById("mealsPerDay");
+    const dietaryInput = document.getElementById("dietaryPreferences");
+    const allergyInput = document.getElementById("allergyNotes");
 
     const age = parseInt(ageInput.value, 10);
     const height = parseInt(heightInput.value, 10);
@@ -332,6 +693,9 @@ const MealPlanner = {
     this.userData.age = age;
     this.userData.height = height;
     this.userData.weight = weight;
+    this.userData.mealsPerDay = Number(mealsPerDayInput?.value || 3);
+    this.userData.dietaryPreferences = String(dietaryInput?.value || "").trim().slice(0, 200);
+    this.userData.allergyNotes = String(allergyInput?.value || "").trim().slice(0, 200);
 
     // 1) BMI
     const heightInMeters = height / 100;
@@ -387,6 +751,7 @@ const MealPlanner = {
     }
 
     this.updateNutritionTargets();
+    this.renderAiProfileSummary();
     this.saveData();
     this.closeSettingsModal();
     this.showToast(
@@ -430,6 +795,7 @@ const MealPlanner = {
 
     const resultCard = document.getElementById("bmiResult");
     if (resultCard) resultCard.style.display = "flex";
+    this.renderAiProfileSummary();
   },
 
   /**
@@ -522,6 +888,13 @@ const MealPlanner = {
 
     if (mealData) {
       // Lưu ý: mealData.name phải khớp với tên key trong recipesDB
+      const mealNameEncoded = encodeURIComponent(String(mealData.name || ""));
+      const detailButton = `<button
+        class="detail-meal-btn"
+        type="button"
+        onclick="event.preventDefault(); event.stopPropagation(); showRecipeDetails(decodeURIComponent('${mealNameEncoded}'))"
+        title="Xem công thức"
+      >🔍</button>`;
       return `
                 <div class="meal-slot-content">
                     <span class="meal-emoji">${mealData.emoji || '🥘'}</span>
@@ -532,12 +905,7 @@ const MealPlanner = {
                 </div>
                 
                 <div class="meal-actions" style="display: flex; gap: 5px;">
-                    <button class="detail-meal-btn" 
-        type="button" 
-        onclick="event.preventDefault(); event.stopPropagation(); showRecipeDetails('${mealData.name}')"
-        title="Xem công thức"
-        >!
-</button>
+                    ${detailButton}
 
                     <button class="remove-meal-btn" 
                             onclick="event.stopPropagation(); removeMeal('${day}', '${meal}')"
@@ -737,7 +1105,7 @@ const MealPlanner = {
     }
   },
 
-  // ===== AI AUTO GENERATE =====
+  // ===== AUTO GENERATE =====
   /**
    * Lấy ngẫu nhiên 1 phần tử trong mảng (có trọng số nghiêng về món gần calo mục tiêu)
    */
@@ -760,7 +1128,7 @@ const MealPlanner = {
    *  - Ưu tiên món không trùng tuần trước
    *  - Phân bổ bữa: Sáng 25%, Trưa 40%, Tối 35%
    */
-  autoGenerateMeals() {
+  autoGenerateMealsLocal() {
     if (!this.userData.targetCalories) {
       this.openWarningModal();
       return;
@@ -822,6 +1190,24 @@ const MealPlanner = {
     this.showToast(
       `Đã tạo thực đơn tuần theo mục tiêu ${target.toLocaleString()} kcal/ngày`
     );
+  },
+
+  async autoGenerateMealsWithAI() {
+    if (!this.userData.targetCalories || !this.userData.bmi) {
+      this.openWarningModal();
+      return;
+    }
+    this.openAiModal();
+    await this.requestAiAdvice();
+  },
+
+  async autoGenerateMeals() {
+    try {
+      await this.autoGenerateMealsWithAI();
+    } catch (err) {
+      console.warn("AI planner failed, fallback local:", err);
+      this.autoGenerateMealsLocal();
+    }
   },
 
   // ===== WEEK NAVIGATION =====
@@ -900,6 +1286,11 @@ window.toggleTheme = toggleTheme;
 window.openWarningModal = () => MealPlanner.openWarningModal();
 window.closeWarningModal = () => MealPlanner.closeWarningModal();
 window.confirmOpenSettings = () => MealPlanner.confirmOpenSettings();
+window.openAiModal = () => MealPlanner.openAiModal();
+window.closeAiModal = () => MealPlanner.closeAiModal();
+window.requestAiAdvice = () => MealPlanner.requestAiAdvice();
+window.applyAiPlanToCurrentWeek = () => MealPlanner.applyAiPlanToCurrentWeek();
+window.openAiHistoryItem = (index) => MealPlanner.openAiHistoryItem(index);
 
 document.addEventListener("DOMContentLoaded", () => {
   MealPlanner.init();

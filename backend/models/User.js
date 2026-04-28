@@ -23,6 +23,17 @@ const profileSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const aiHistorySchema = new mongoose.Schema(
+  {
+    createdAt: { type: Date, default: Date.now },
+    source: { type: String, default: "gemini" },
+    ingredientsRaw: { type: String, default: "" },
+    note: { type: String, default: "" },
+    result: { type: mongoose.Schema.Types.Mixed, default: {} },
+  },
+  { _id: false },
+);
+
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -47,6 +58,7 @@ const userSchema = new mongoose.Schema(
       },
     },
     profile: { type: profileSchema, default: () => ({}) },
+    aiHistory: { type: [aiHistorySchema], default: [] },
   },
   { timestamps: true },
 );

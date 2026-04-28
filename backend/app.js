@@ -12,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const pageRoutes = require('./routes/pageRoutes');
 const foodRoutes = require('./routes/foodRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const { ensureSeeded } = require('./controllers/foodController');
 
 const app = express();
@@ -55,6 +56,7 @@ app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 // REST API
 app.use('/api/foods', foodRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Pages / Auth
 app.use('/users', userRoutes);
