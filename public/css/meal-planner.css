@@ -550,6 +550,66 @@ h1, h2, h3 {
     transform: translateY(2px);
     box-shadow: none;
 }
+
+/* Dark Theme Overrides */
+[data-theme="dark"] .auto-generate-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+    color: var(--white);
+}
+
+[data-theme="dark"] .auto-generate-btn:hover {
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Dark Theme for Calendar Title */
+[data-theme="dark"] .calendar-title {
+    color: var(--text-primary);
+}
+
+/* Dark Theme for AI Modal */
+[data-theme="dark"] .ai-modal-card {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .ai-step-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .ai-step-note {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] #aiAdviceResult {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Dark Theme for Modal */
+[data-theme="dark"] .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .ai-profile-summary {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .ai-history-item {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .ai-history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent);
+}
 /* ===== DAYS GRID ===== */
 .days-grid {
     display: grid;

@@ -9,7 +9,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Cơm gà vàng ươm thơm lừng, thịt gà dai ngọt đặc sản phố Hội.",
     ingredients: ["1 bát gạo", "150g ức gà", "Rau thơm, hành", "Nghệ tươi", "Nước mắm, tiêu"],
-    instructions: ["Luộc gà với gừng và hành", "Nấu cơm bằng nước luộc gà và nghệ", "Xé gà trộn với hành phi và gia vị", "Dọn cơm kèm rau thơm và nước mắm"]
+    instructions: ["Luộc gà với gừng và hành", "Nấu cơm bằng nước luộc gà và nghệ", "Xé gà trộn với hành phi và gia vị", "Dọn cơm kèm rau thơm và nước mắm"],
+    nutrition: { calories: 580, carbs: 65, protein: 32, fat: 18, fiber: 2 }
   },
   "Phở bò Hà Nội": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512111dfcf065cac26fc487bbc61bf06b3880.jpg",
@@ -18,7 +19,8 @@ const recipesDB = {
     difficulty: "Khó",
     description: "Món ăn quốc hồn quốc túy với nước dùng thanh ngọt từ xương bò.",
     ingredients: ["200g bánh phở", "150g thịt bò", "Xương bò", "Hành, gừng, quế, hồi", "Rau thơm, giá đỗ"],
-    instructions: ["Ninh xương bò với gừng nướng trong 4-5 tiếng", "Thêm quế, hồi, thảo quả vào nước dùng", "Trụng bánh phở, xếp thịt bò lên trên", "Chan nước dùng nóng, thêm hành và rau thơm"]
+    instructions: ["Ninh xương bò với gừng nướng trong 4-5 tiếng", "Thêm quế, hồi, thảo quả vào nước dùng", "Trụng bánh phở, xếp thịt bò lên trên", "Chan nước dùng nóng, thêm hành và rau thơm"],
+    nutrition: { calories: 450, carbs: 65, protein: 25, fat: 10, fiber: 2 }
   },
   "Bún chả Hà Nội": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512118dae424aca7dcc6e03d49502e50564ad.jpg",
@@ -27,7 +29,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Thịt nướng than hoa thơm lừng ăn kèm bún và nước mắm chua ngọt.",
     ingredients: ["300g thịt ba chỉ", "200g thịt nạc vai xay", "200g bún tươi", "Nước mắm, đường, tỏi", "Rau sống, dưa góp"],
-    instructions: ["Ướp thịt ba chỉ với nước mắm, đường, tỏi băm", "Vo viên thịt xay, ướp gia vị tương tự", "Nướng thịt trên than hoa đến vàng thơm", "Pha nước chấm chua ngọt, thêm ớt tỏi", "Dọn bún kèm thịt nướng, rau sống và nước chấm"]
+    instructions: ["Ướp thịt ba chỉ với nước mắm, đường, tỏi băm", "Vo viên thịt xay, ướp gia vị tương tự", "Nướng thịt trên than hoa đến vàng thơm", "Pha nước chấm chua ngọt, thêm ớt tỏi", "Dọn bún kèm thịt nướng, rau sống và nước chấm"],
+    nutrition: { calories: 520, carbs: 55, protein: 28, fat: 20, fiber: 4 }
   },
   "Bánh mì thịt": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211b890f3c4b0c5a6e2042935529195dbcc.jpg",
@@ -36,7 +39,8 @@ const recipesDB = {
     difficulty: "Dễ",
     description: "Ổ bánh mì giòn rụm kẹp pate, thịt nguội đậm đà hương vị Việt.",
     ingredients: ["1 ổ bánh mì", "100g pate gan", "80g chả lụa", "Dưa leo, đồ chua", "Rau mùi, ớt, xì dầu"],
-    instructions: ["Nướng giòn bánh mì", "Phết pate đều lên ruột bánh", "Xếp chả lụa, thịt nguội lên", "Thêm dưa leo, đồ chua, rau mùi", "Rưới xì dầu và thêm ớt tùy khẩu vị"]
+    instructions: ["Nướng giòn bánh mì", "Phết pate đều lên ruột bánh", "Xếp chả lụa, thịt nguội lên", "Thêm dưa leo, đồ chua, rau mùi", "Rưới xì dầu và thêm ớt tùy khẩu vị"],
+    nutrition: { calories: 380, carbs: 45, protein: 15, fat: 16, fiber: 3 }
   },
   "Gỏi cuốn tôm thịt": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512113b29efa85e5718ada0a48add33674027.jpg",
@@ -45,7 +49,8 @@ const recipesDB = {
     difficulty: "Dễ",
     description: "Món cuốn thanh mát với tôm thịt tươi ngon, chấm tương đen béo ngậy.",
     ingredients: ["10 tờ bánh tráng", "200g tôm sú", "150g thịt ba chỉ luộc", "Bún, rau sống, húng quế", "Đậu phộng, tương đen"],
-    instructions: ["Luộc tôm và thịt ba chỉ, để nguội thái lát", "Nhúng bánh tráng qua nước ấm", "Xếp rau, bún, thịt, tôm lên bánh", "Cuốn chặt tay từ dưới lên", "Pha nước chấm tương đen với đậu phộng giã"]
+    instructions: ["Luộc tôm và thịt ba chỉ, để nguội thái lát", "Nhúng bánh tráng qua nước ấm", "Xếp rau, bún, thịt, tôm lên bánh", "Cuốn chặt tay từ dưới lên", "Pha nước chấm tương đen với đậu phộng giã"],
+    nutrition: { calories: 180, carbs: 25, protein: 12, fat: 4, fiber: 6 }
   },
   "Bún bò Huế": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211a65a9d7e75c2950b772061f5d4240959.jpg",
@@ -54,7 +59,8 @@ const recipesDB = {
     difficulty: "Khó",
     description: "Hương vị cay nồng đặc trưng cố đô với sả và mắm ruốc.",
     ingredients: ["300g bún tươi", "200g bắp bò", "100g giò heo", "Sả, ớt, mắm ruốc", "Rau muống, bắp chuối"],
-    instructions: ["Ninh xương và giò heo trong 2 tiếng", "Phi sả và ớt, thêm mắm ruốc tạo màu", "Cho bắp bò vào hầm mềm", "Trụng bún, xếp thịt, chan nước dùng nóng", "Ăn kèm rau muống, bắp chuối bào"]
+    instructions: ["Ninh xương và giò heo trong 2 tiếng", "Phi sả và ớt, thêm mắm ruốc tạo màu", "Cho bắp bò vào hầm mềm", "Trụng bún, xếp thịt, chan nước dùng nóng", "Ăn kèm rau muống, bắp chuối bào"],
+    nutrition: { calories: 480, carbs: 52, protein: 28, fat: 18, fiber: 3 }
   },
   "Cá kho tộ": {
     image: "https://sf-static.upanhlaylink.com/img/image_2025121101c1ece6f4c310b83388e44e8a426d88.jpg",
@@ -63,7 +69,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Cá kho đậm đà, màu cánh gián đẹp mắt, cực kỳ đưa cơm.",
     ingredients: ["500g cá lóc hoặc cá basa", "Nước màu (caramel)", "Nước mắm, đường, tiêu", "Hành lá, ớt, tỏi", "Nước dừa tươi"],
-    instructions: ["Cắt cá thành khúc, ướp với nước mắm và tiêu", "Thắng nước màu trong nồi đất", "Xếp cá vào, thêm nước dừa và gia vị", "Kho lửa nhỏ 30-40 phút cho cá thấm", "Rắc hành lá và tiêu trước khi tắt bếp"]
+    instructions: ["Cắt cá thành khúc, ướp với nước mắm và tiêu", "Thắng nước màu trong nồi đất", "Xếp cá vào, thêm nước dừa và gia vị", "Kho lửa nhỏ 30-40 phút cho cá thấm", "Rắc hành lá và tiêu trước khi tắt bếp"],
+    nutrition: { calories: 300, carbs: 10, protein: 35, fat: 12, fiber: 1 }
   },
   "Thịt kho tàu": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211f75b0d44512fe25e88f9dd3fe35c47cb.jpg",
@@ -72,7 +79,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Thịt kho mềm rục, trứng vịt thấm vị, món ăn không thể thiếu ngày Tết.",
     ingredients: ["500g thịt ba chỉ", "6 quả trứng vịt", "Nước dừa tươi", "Nước mắm, đường, tỏi", "Hành tím, tiêu"],
-    instructions: ["Cắt thịt miếng vuông, ướp với nước mắm và tỏi", "Luộc và bóc vỏ trứng vịt", "Thắng nước màu, cho thịt vào đảo đều", "Thêm nước dừa, hầm lửa nhỏ 1 tiếng", "Cho trứng vào kho thêm 15 phút"]
+    instructions: ["Cắt thịt miếng vuông, ướp với nước mắm và tỏi", "Luộc và bóc vỏ trứng vịt", "Thắng nước màu, cho thịt vào đảo đều", "Thêm nước dừa, hầm lửa nhỏ 1 tiếng", "Cho trứng vào kho thêm 15 phút"],
+    nutrition: { calories: 450, carbs: 5, protein: 25, fat: 35, fiber: 0 }
   },
   "Canh chua cá": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211a9a226403aae0ac8bc0c76af0924ff60.jpg",
@@ -81,7 +89,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Vị chua thanh của me và dứa kết hợp với cá tươi ngon.",
     ingredients: ["400g cá lóc", "200g dứa (thơm)", "Cà chua, đậu bắp, giá", "Me, rau om, ngò gai", "Nước mắm, đường"],
-    instructions: ["Phi tỏi thơm, cho cà chua vào xào", "Đổ nước, thêm me và dứa nấu sôi", "Cho cá vào nấu chín", "Thêm đậu bắp, giá, nêm gia vị", "Rắc rau om, ngò gai trước khi tắt bếp"]
+    instructions: ["Phi tỏi thơm, cho cà chua vào xào", "Đổ nước, thêm me và dứa nấu sôi", "Cho cá vào nấu chín", "Thêm đậu bắp, giá, nêm gia vị", "Rắc rau om, ngò gai trước khi tắt bếp"],
+    nutrition: { calories: 200, carbs: 15, protein: 25, fat: 5, fiber: 4 }
   },
   "Chả giò (Nem rán)": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211da36eabaf4ee0d560de48168b94a5a13.jpg",
@@ -90,7 +99,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Những cuốn chả giò vàng ruộm, giòn tan với nhân thịt tôm đầy đặn.",
     ingredients: ["200g thịt heo xay", "100g tôm băm", "Miến, mộc nhĩ, cà rốt", "Bánh tráng nem", "Trứng, hành, tiêu"],
-    instructions: ["Trộn thịt, tôm với miến, mộc nhĩ, cà rốt bào", "Nêm gia vị, thêm trứng để kết dính", "Cuốn nhân vào bánh tráng chặt tay", "Chiên ngập dầu đến vàng giòn", "Ăn kèm nước mắm chua ngọt và rau sống"]
+    instructions: ["Trộn thịt, tôm với miến, mộc nhĩ, cà rốt bào", "Nêm gia vị, thêm trứng để kết dính", "Cuốn nhân vào bánh tráng chặt tay", "Chiên ngập dầu đến vàng giòn", "Ăn kèm nước mắm chua ngọt và rau sống"],
+    nutrition: { calories: 350, carbs: 30, protein: 18, fat: 20, fiber: 2 }
   },
   "Cơm tấm sườn bì chả": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512115f00d28a72c4e0461d63cb9102b90340.jpg",
@@ -99,7 +109,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Sườn nướng thơm phức ăn cùng cơm tấm Sài Gòn đặc trưng.",
     ingredients: ["1 bát cơm tấm", "1 miếng sườn nướng", "Bì heo, chả trứng", "Đồ chua, dưa leo", "Mỡ hành, nước mắm"],
-    instructions: ["Ướp sườn với sả, tỏi, nước mắm, mật ong", "Nướng sườn trên than hoặc lò", "Trộn bì với thính gạo", "Hấp chả trứng", "Dọn cơm với sườn, bì, chả và mỡ hành"]
+    instructions: ["Ướp sườn với sả, tỏi, nước mắm, mật ong", "Nướng sườn trên than hoặc lò", "Trộn bì với thính gạo", "Hấp chả trứng", "Dọn cơm với sườn, bì, chả và mỡ hành"],
+    nutrition: { calories: 650, carbs: 70, protein: 30, fat: 25, fiber: 3 }
   },
   "Mì Quảng": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512111cd4ebc0fe6f5edb840fe4c940c89ec1.jpg",
@@ -108,7 +119,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Đặc sản Quảng Nam với nước lèo sệt đậm đà và bánh đa giòn tan.",
     ingredients: ["300g mì Quảng", "200g tôm, 150g thịt heo", "Đậu phộng rang, bánh tráng", "Rau sống, hành lá", "Nghệ, dầu điều"],
-    instructions: ["Xào tôm và thịt với nghệ và dầu điều", "Thêm nước, nấu thành nước lèo sệt", "Trụng mì, xếp ra tô", "Chan nước lèo, thêm tôm thịt", "Rắc đậu phộng, ăn kèm bánh tráng và rau"]
+    instructions: ["Xào tôm và thịt với nghệ và dầu điều", "Thêm nước, nấu thành nước lèo sệt", "Trụng mì, xếp ra tô", "Chan nước lèo, thêm tôm thịt", "Rắc đậu phộng, ăn kèm bánh tráng và rau"],
+    nutrition: { calories: 500, carbs: 60, protein: 25, fat: 15, fiber: 4 }
   },
   "Bánh xèo": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211227bda212912ca66f4fdcc51c15b7bd0.jpg",
@@ -117,7 +129,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Bánh xèo vàng ươm, vỏ giòn tan, nhân tôm thịt đầy ắp.",
     ingredients: ["200g bột bánh xèo", "200g tôm, 150g thịt ba chỉ", "Giá đỗ, hành lá", "Nước cốt dừa, nghệ", "Rau sống, nước mắm chua ngọt"],
-    instructions: ["Pha bột với nước cốt dừa và nghệ", "Xào tôm thịt sơ qua", "Đổ bột vào chảo nóng, thêm nhân và giá", "Đậy nắp, chiên đến giòn vàng", "Gập đôi bánh, ăn kèm rau và nước chấm"]
+    instructions: ["Pha bột với nước cốt dừa và nghệ", "Xào tôm thịt sơ qua", "Đổ bột vào chảo nóng, thêm nhân và giá", "Đậy nắp, chiên đến giòn vàng", "Gập đôi bánh, ăn kèm rau và nước chấm"],
+    nutrition: { calories: 400, carbs: 45, protein: 20, fat: 15, fiber: 5 }
   },
   "Hủ tiếu Nam Vang": {
     image: "https://sf-static.upanhlaylink.com/img/image_2025121163ea3d4e399a9dc8564c7d012ee19235.jpg",
@@ -126,7 +139,8 @@ const recipesDB = {
     difficulty: "Khó",
     description: "Nước dùng ngọt thanh từ xương, ăn kèm tôm, gan và thịt băm.",
     ingredients: ["200g hủ tiếu khô", "100g thịt heo, 100g tôm", "Gan, tim heo", "Giá, hẹ, hành phi", "Xương heo ninh"],
-    instructions: ["Ninh xương heo lấy nước dùng trong", "Trụng hủ tiếu, xếp ra tô", "Xếp thịt, tôm, gan, tim lên trên", "Chan nước dùng nóng", "Rắc hành phi, ăn kèm giá và hẹ"]
+    instructions: ["Ninh xương heo lấy nước dùng trong", "Trụng hủ tiếu, xếp ra tô", "Xếp thịt, tôm, gan, tim lên trên", "Chan nước dùng nóng", "Rắc hành phi, ăn kèm giá và hẹ"],
+    nutrition: { calories: 450, carbs: 55, protein: 25, fat: 12, fiber: 3 }
   },
   "Bò lúc lắc": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512114690676a46bf3fc17ee07ec6c451e858.jpg",
@@ -135,7 +149,8 @@ const recipesDB = {
     difficulty: "Dễ",
     description: "Thịt bò mềm mọng nước, xào nhanh lửa lớn với rau củ.",
     ingredients: ["300g thịt bò thăn", "Tỏi, hành tây", "Xì dầu, dầu hào", "Tiêu đen, bơ", "Cà chua, xà lách"],
-    instructions: ["Cắt bò thành hạt lựu, ướp xì dầu và tiêu", "Đun nóng chảo với bơ và tỏi", "Cho bò vào xào lửa lớn nhanh tay", "Thêm hành tây, nêm dầu hào", "Dọn kèm cà chua, xà lách và cơm trắng"]
+    instructions: ["Cắt bò thành hạt lựu, ướp xì dầu và tiêu", "Đun nóng chảo với bơ và tỏi", "Cho bò vào xào lửa lớn nhanh tay", "Thêm hành tây, nêm dầu hào", "Dọn kèm cà chua, xà lách và cơm trắng"],
+    nutrition: { calories: 350, carbs: 10, protein: 30, fat: 20, fiber: 2 }
   },
   "Gà nướng muối ớt": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512116a7638a4b19fca2c111d86388ffa5f94.jpg",
@@ -144,7 +159,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Gà nướng da giòn, thịt cay nồng vị muối ớt sả.",
     ingredients: ["1 con gà ta (1.2kg)", "Muối hạt, ớt bột", "Sả, tỏi, gừng", "Mật ong, nước mắm", "Lá chanh"],
-    instructions: ["Làm sạch gà, chặt miếng vừa ăn", "Ướp gà với muối, ớt, sả, tỏi băm", "Để ngấm gia vị 30 phút", "Nướng gà trên than hoặc lò 200°C", "Phết mật ong, nướng thêm 5 phút cho vàng"]
+    instructions: ["Làm sạch gà, chặt miếng vừa ăn", "Ướp gà với muối, ớt, sả, tỏi băm", "Để ngấm gia vị 30 phút", "Nướng gà trên than hoặc lò 200°C", "Phết mật ong, nướng thêm 5 phút cho vàng"],
+    nutrition: { calories: 280, carbs: 5, protein: 35, fat: 12, fiber: 1 }
   },
   "Lẩu thái hải sản": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211f684b0d880c4157c38e2e6063856a4de.jpg",
@@ -153,7 +169,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Nồi lẩu chua cay đậm đà, ngập tràn hải sản tươi ngon.",
     ingredients: ["500g hải sản các loại", "Nấm, đậu hũ, rau", "Sả, riềng, lá chanh", "Ớt, nước cốt chanh", "Nước mắm, sa tế"],
-    instructions: ["Nấu nước dùng với sả, riềng, lá chanh", "Thêm sa tế và ớt tạo vị cay", "Cho hải sản, nấm, đậu hũ vào", "Nêm nước mắm và nước cốt chanh", "Nhúng rau và bún ăn kèm"]
+    instructions: ["Nấu nước dùng với sả, riềng, lá chanh", "Thêm sa tế và ớt tạo vị cay", "Cho hải sản, nấm, đậu hũ vào", "Nêm nước mắm và nước cốt chanh", "Nhúng rau và bún ăn kèm"],
+    nutrition: { calories: 250, carbs: 15, protein: 30, fat: 8, fiber: 4 }
   },
   "Cháo lòng": {
     image: "https://sf-static.upanhlaylink.com/img/image_202512114a8f617e9ab5e1a1211de1521e00a984.jpg",
@@ -162,7 +179,8 @@ const recipesDB = {
     difficulty: "Khó",
     description: "Cháo sánh mịn nấu từ nước luộc lòng, ăn kèm dồi trường giòn sật.",
     ingredients: ["200g gạo", "300g lòng heo các loại", "Huyết heo", "Hành lá, gừng, tiêu", "Giá, rau mùi, quẩy"],
-    instructions: ["Làm sạch lòng với muối và giấm", "Luộc lòng với gừng, thái lát", "Nấu cháo nhừ với nước luộc lòng", "Xếp lòng và huyết lên cháo", "Rắc hành, tiêu, ăn kèm quẩy và giá"]
+    instructions: ["Làm sạch lòng với muối và giấm", "Luộc lòng với gừng, thái lát", "Nấu cháo nhừ với nước luộc lòng", "Xếp lòng và huyết lên cháo", "Rắc hành, tiêu, ăn kèm quẩy và giá"],
+    nutrition: { calories: 400, carbs: 45, protein: 25, fat: 15, fiber: 2 }
   },
   "Bún riêu cua": {
     image: "https://sf-static.upanhlaylink.com/img/image_2025121121c7774ff5ecf909e54251366bdd3aa7.jpg",
@@ -171,7 +189,8 @@ const recipesDB = {
     difficulty: "Trung bình",
     description: "Vị ngọt thanh của cua đồng hòa quyện với vị chua dịu của cà chua.",
     ingredients: ["300g bún tươi", "200g cua đồng", "Cà chua, đậu hũ chiên", "Mắm tôm, me", "Rau muống, hành lá"],
-    instructions: ["Giã cua, lọc lấy nước và gạch", "Nấu nước cua sôi, gạch nổi lên thành riêu", "Xào cà chua, thêm nước cua và me", "Cho đậu hũ chiên vào", "Trụng bún, chan nước riêu, thêm mắm tôm"]
+    instructions: ["Giã cua, lọc lấy nước và gạch", "Nấu nước cua sôi, gạch nổi lên thành riêu", "Xào cà chua, thêm nước cua và me", "Cho đậu hũ chiên vào", "Trụng bún, chan nước riêu, thêm mắm tôm"],
+    nutrition: { calories: 350, carbs: 40, protein: 20, fat: 10, fiber: 5 }
   },
   "Xôi gà": {
     image: "https://sf-static.upanhlaylink.com/img/image_20251211cb476ff00d1f5fa213c65106ea2d2d01.jpg",
