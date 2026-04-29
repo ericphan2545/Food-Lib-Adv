@@ -92,7 +92,7 @@ const MealPlanner = {
       if (ageInput) ageInput.value = this.userData.age || "";
       if (heightInput) heightInput.value = this.userData.height || "";
       if (weightInput) weightInput.value = this.userData.weight || "";
-      if (mealsPerDayInput) mealsPerDayInput.value = this.userData.mealsPerDay || 3;
+      if (mealsPerDayInput) mealsPerDayInput.value = "3 bữa (Sáng - Trưa - Tối)";
       if (dietaryInput) dietaryInput.value = this.userData.dietaryPreferences || "";
       if (allergyInput) allergyInput.value = this.userData.allergyNotes || "";
       if (this.userData.gender) this.selectGender(this.userData.gender);
@@ -355,7 +355,7 @@ const MealPlanner = {
             tdee: this.userData.tdee,
             targetCalories: this.userData.targetCalories,
             goal: this.userData.goal,
-            mealsPerDay: Number(this.userData.mealsPerDay || 3),
+            mealsPerDay: 3,
             dietaryPreferences: this.userData.dietaryPreferences || "",
             allergyNotes: this.userData.allergyNotes || "",
           },
@@ -736,7 +736,6 @@ const MealPlanner = {
     const ageInput = document.getElementById("age");
     const heightInput = document.getElementById("height");
     const weightInput = document.getElementById("weight");
-    const mealsPerDayInput = document.getElementById("mealsPerDay");
     const dietaryInput = document.getElementById("dietaryPreferences");
     const allergyInput = document.getElementById("allergyNotes");
 
@@ -758,7 +757,7 @@ const MealPlanner = {
     this.userData.age = age;
     this.userData.height = height;
     this.userData.weight = weight;
-    this.userData.mealsPerDay = Number(mealsPerDayInput?.value || 3);
+    this.userData.mealsPerDay = 3;
     this.userData.dietaryPreferences = String(dietaryInput?.value || "").trim().slice(0, 200);
     this.userData.allergyNotes = String(allergyInput?.value || "").trim().slice(0, 200);
 

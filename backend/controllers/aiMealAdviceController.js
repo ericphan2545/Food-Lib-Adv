@@ -464,7 +464,7 @@ exports.getAdvice = async (req, res) => {
     const note = String(req.body?.note || '').trim().slice(0, 500);
     const allergyNotes = String(profile?.allergyNotes || '').trim().slice(0, 300);
     const dietaryPreferences = String(profile?.dietaryPreferences || '').trim().slice(0, 300);
-    const mealsPerDay = Math.max(3, Math.min(4, Number(profile?.mealsPerDay || 3)));
+    const mealsPerDay = 3;
 
     logAi(reqId, 'request received', {
       bmi,
