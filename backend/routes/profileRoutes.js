@@ -5,6 +5,6 @@ const { requireLogin } = require('../middleware/auth');
 const router = express.Router();
 
 router.get('/', requireLogin, profileController.getProfile);
-router.put('/', requireLogin, profileController.updateProfile);
+router.put('/', requireLogin, profileController.updateProfile); // chuyển hướng sang controller profile
 
 module.exports = router;

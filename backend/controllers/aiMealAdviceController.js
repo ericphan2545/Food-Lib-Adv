@@ -15,7 +15,7 @@ function normalizeIngredients(raw) {
     .map((x) => x.trim())
     .filter(Boolean)
     .slice(0, 50);
-}
+}//biến thành format chuẩn vd ["trứng,cá"]
 
 function parseIngredientsText(rawText) {
   if (!rawText) return [];
@@ -29,7 +29,7 @@ function parseIngredientsText(rawText) {
 function safeNumber(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
-}
+}//Chỉ nhận số thật 
 
 function classifyBMIText(bmi) {
   const b = Number(bmi);
@@ -219,7 +219,7 @@ function buildFoodIndex(foods = []) {
       byMeal.lunch.push(food);
       byMeal.dinner.push(food);
     }
-  });
+  });//build food ra đủ 3 bữa
   return { byId, byMeal };
 }
 
@@ -306,7 +306,7 @@ function normalizeAiResponse(parsed, profile, bmi, targetCalories, foodIndex, so
   return {
     source,
     bmiSummary: {
-      category: parsed?.bmiSummary?.category || profile?.bmiCategory || classifyBMIText(bmi),
+      category: parsed?.bmiSummary?.category || profile?.bmiCategory || classifyBMIText(bmi), //Ưu tiên lấy BMI tính từ AI 
       targetCalories: Number(parsed?.bmiSummary?.targetCalories) || targetCalories || 0,
       tips: Array.isArray(parsed?.bmiSummary?.tips) ? parsed.bmiSummary.tips.slice(0, 8) : [],
     },
@@ -433,7 +433,7 @@ async function requestGeminiWithRetry(genAI, prompt) {
 }
 
 exports.getAdvice = async (req, res) => {
-  try {
+  try { // xử lý các chuỗi thô về chuỗi phù hợp cho promote AI
     const apiKey = process.env.GEMINI_API_KEY;
     const profile = req.body?.profile || {};
     const bmi = safeNumber(profile?.bmi ?? req.body?.bmi);
@@ -445,7 +445,7 @@ exports.getAdvice = async (req, res) => {
     const allergyNotes = String(profile?.allergyNotes || '').trim().slice(0, 300);
     const dietaryPreferences = String(profile?.dietaryPreferences || '').trim().slice(0, 300);
     const mealsPerDay = Math.max(3, Math.min(4, Number(profile?.mealsPerDay || 3)));
-
+    //kiểm tra các điều kiện trước khi gửi AI
     if (!bmi || bmi < 10 || bmi > 60) {
       return res.status(400).json({ error: 'BMI không hợp lệ (10 - 60)' });
     }
@@ -547,11 +547,11 @@ ${foodBrief}
     // Gemini đôi khi vẫn kèm text -> cố gắng parse đoạn JSON đầu tiên
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
-    const jsonSlice = firstBrace >= 0 && lastBrace > firstBrace ? text.slice(firstBrace, lastBrace + 1) : text;
+    const jsonSlice = firstBrace >= 0 && lastBrace > firstBrace ? text.slice(firstBrace, lastBrace + 1) : text; //Kiểm tra chuẩn json chưa
 
     let parsed;
     try {
-      parsed = JSON.parse(jsonSlice);
+      parsed = JSON.parse(jsonSlice); 
     } catch (e) {
       const fallback = createLocalFallbackPlan({
         bmi,
@@ -576,8 +576,8 @@ ${foodBrief}
       foodIndex,
       buildIngredientKeywords(ingredients),
     );
-    if (ingredientFit.totalMeals > 0 && ingredientFit.coverage < 0.2) {
-      const fallback = createLocalFallbackPlan({
+    if (ingredientFit.totalMeals > 0 && ingredientFit.coverage < 0.2) { //kiểm tra thử AI dùng bao nhiêu nguyên liệu cho sẵn nếu dưới 20% ko chấp nhận
+      const fallback = createLocalFallbackPlan({ // chuyển sang rule based khi không đạt
         bmi,
         targetCalories,
         ingredients,
@@ -601,7 +601,7 @@ ${foodBrief}
       note: String(req.body?.note || '').slice(0, 400),
       result: normalized,
     });
-    return res.json(normalized);
+    return res.json(normalized); //trả về res ở routes api/advice
   } catch (err) {
     console.error('[AI] advice error:', err);
     const status = Number(err?.status) || 500;

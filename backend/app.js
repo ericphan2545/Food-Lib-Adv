@@ -51,6 +51,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Log incoming requests
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.path}`);
+  }
+  next();
+});
+
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 // REST API

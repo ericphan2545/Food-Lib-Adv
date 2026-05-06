@@ -19,7 +19,7 @@ const MealPlanner = {
     mealsPerDay: 3,
     dietaryPreferences: "",
     allergyNotes: "",
-  },
+  }, //userData được fill ở calculateBMI() dòng 735
 
   // Cờ đánh dấu user đã đăng nhập (backend sẽ inject qua window.CURRENT_USER)
   get isLoggedIn() {
@@ -40,7 +40,7 @@ const MealPlanner = {
       fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(this.userData),
+        body: JSON.stringify(this.userData), //Chuyển hướng sang routes để đến controllers lưu dữ liệu
       }).catch((err) => console.warn("Không thể lưu profile lên server:", err));
     }
   },
@@ -282,12 +282,12 @@ const MealPlanner = {
   },
 
   tokenizeIngredients(raw) {
-    return String(raw || "")
+    return String(raw || "") // return ngay lập tức nếu chuỗi rỗng 
       .split(/[\n,;|]/g)
       .map((x) => x.trim())
       .filter(Boolean)
-      .slice(0, 80);
-  },
+      .slice(0, 80); // chuẩn hóa chuỗi đầu vào thành mảng gồm các phần tử vd: trứng, cá => ["trứng","cá"]
+  }, // làm sạch chuỗi đầu vào
 
   renderAiProfileSummary() {
     const el = document.getElementById("aiProfileSummary");
@@ -312,16 +312,16 @@ const MealPlanner = {
   },
 
   async requestAiAdvice() {
-    const status = document.getElementById("aiAdviceStatus");
+    const status = document.getElementById("aiAdviceStatus"); // kết quả AI sẽ trả về
     const out = document.getElementById("aiAdviceResult");
-    const applyBtn = document.getElementById("applyAiPlanBtn");
-    const ingredientsInput = document.getElementById("aiIngredientsInput");
-    const noteInput = document.getElementById("aiNoteInput");
+    const applyBtn = document.getElementById("applyAiPlanBtn"); // kết quả khi ấn nút áp dụng vào lịch hiện tại
+    const ingredientsInput = document.getElementById("aiIngredientsInput"); //phần nguyên liệu có sẵn
+    const noteInput = document.getElementById("aiNoteInput"); // phần note
 
-    const ingredientsRaw = String(ingredientsInput?.value || "");
-    const ingredients = this.tokenizeIngredients(ingredientsRaw);
-    const note = String(noteInput?.value || "").trim();
-
+    const ingredientsRaw = String(ingredientsInput?.value || ""); //Lấy phần nguyên liệu
+    const ingredients = this.tokenizeIngredients(ingredientsRaw); // xử lý phần chuỗi nguyên liệu có sẵn
+    const note = String(noteInput?.value || "").trim(); // xử lý phần note
+    // kiểm tra đã có đủ các điều kiện chưa trước khi thực hiện tạo promote
     if (!this.userData?.bmi || !this.userData?.targetCalories) {
       if (status) status.textContent = "Bạn cần cập nhật BMI/TDEE trước khi tạo thực đơn AI.";
       return;
@@ -334,7 +334,7 @@ const MealPlanner = {
     if (status) status.textContent = "Đang gọi AI để tối ưu thực đơn 7 ngày...";
     if (out) out.innerHTML = "";
     if (applyBtn) applyBtn.style.display = "none";
-
+    // gửi dữ liệu đi thông qua /api/ai/advice => tiếp tục xử lý bên routes
     try {
       const res = await fetch("/api/ai/advice", {
         method: "POST",
@@ -343,7 +343,7 @@ const MealPlanner = {
           ingredientsRaw,
           ingredients,
           note,
-          profile: {
+          profile: { // userdata bao gồm các thành phần của người dùng được định nghĩa ở dòng 5
             gender: this.userData.gender,
             age: this.userData.age,
             height: this.userData.height,
@@ -732,7 +732,7 @@ const MealPlanner = {
     return Math.round(target);
   },
 
-  calculateBMI() {
+  calculateBMI() { //lấy các dữ liệu được nhập ở các ô rồi tính toán BMI, TDEE, sau đó fill userData
     const ageInput = document.getElementById("age");
     const heightInput = document.getElementById("height");
     const weightInput = document.getElementById("weight");
